@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -16,6 +17,8 @@ import {
 } from "@/components/ui/card";
 import { PasswordInput } from "@/components/shared/PasswordInput";
 import { AUTH_ROUTES } from "@/constants/auth.constants";
+import { useAuth } from "@/hooks/useAuth";
+import { getErrorMessage } from "@/lib/auth/api-error";
 import {
   loginSchema,
   type LoginSchema,
@@ -27,6 +30,9 @@ type LoginFormProps = {
 };
 
 export function LoginForm({ className }: LoginFormProps) {
+  const { login } = useAuth();
+  const [formError, setFormError] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -40,9 +46,16 @@ export function LoginForm({ className }: LoginFormProps) {
   });
 
   const onSubmit = async (data: LoginSchema) => {
-    // TODO: Integrate with authentication API
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    console.log("Login submitted (mock):", data);
+    setFormError(null);
+
+    try {
+      await login({
+        email: data.email,
+        password: data.password,
+      });
+    } catch (error) {
+      setFormError(getErrorMessage(error));
+    }
   };
 
   return (
@@ -62,6 +75,12 @@ export function LoginForm({ className }: LoginFormProps) {
           className="space-y-5"
           noValidate
         >
+          {formError ? (
+            <p className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive" role="alert">
+              {formError}
+            </p>
+          ) : null}
+
           <div className="space-y-2">
             <Label htmlFor="login-email">Email</Label>
             <Input

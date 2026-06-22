@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -16,6 +17,8 @@ import {
 } from "@/components/ui/card";
 import { PasswordInput } from "@/components/shared/PasswordInput";
 import { AUTH_ROUTES } from "@/constants/auth.constants";
+import { useAuth } from "@/hooks/useAuth";
+import { getErrorMessage } from "@/lib/auth/api-error";
 import {
   registerSchema,
   type RegisterSchema,
@@ -27,6 +30,9 @@ type RegisterFormProps = {
 };
 
 export function RegisterForm({ className }: RegisterFormProps) {
+  const { register: registerUser } = useAuth();
+  const [formError, setFormError] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -41,9 +47,17 @@ export function RegisterForm({ className }: RegisterFormProps) {
   });
 
   const onSubmit = async (data: RegisterSchema) => {
-    // TODO: Integrate with registration API
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    console.log("Register submitted (mock):", data);
+    setFormError(null);
+
+    try {
+      await registerUser({
+        email: data.email,
+        password: data.password,
+        name: data.fullName,
+      });
+    } catch (error) {
+      setFormError(getErrorMessage(error));
+    }
   };
 
   return (
@@ -63,6 +77,12 @@ export function RegisterForm({ className }: RegisterFormProps) {
           className="space-y-5"
           noValidate
         >
+          {formError ? (
+            <p className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive" role="alert">
+              {formError}
+            </p>
+          ) : null}
+
           <div className="space-y-2">
             <Label htmlFor="register-full-name">Full name</Label>
             <Input

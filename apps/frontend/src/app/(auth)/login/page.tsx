@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { GuestRoute } from "@/components/auth";
 import { LoginForm } from "@/components/features/auth";
 import { AuthLayout } from "@/components/layout/auth";
 
@@ -11,7 +12,9 @@ export const metadata: Metadata = {
 export default function LoginPage() {
   return (
     <AuthLayout>
-      <LoginForm />
+      <GuestRoute>
+        <LoginForm />
+      </GuestRoute>
     </AuthLayout>
   );
 }

@@ -1,13 +1,199 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum JobStatus {
+  SAVED
+  APPLIED
+  INTERVIEWING
+  OFFER
+  REJECTED
+  WITHDRAWN
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum JobActivityType {
+  STATUS_CHANGE
+  NOTE_ADDED
+  INTERVIEW_SCHEDULED
+  FOLLOW_UP
+  CUSTOM
+}
+
+enum NotificationType {
+  JOB_UPDATE
+  INTERVIEW_REMINDER
+  SYSTEM
+  CUSTOM
+}
+
+model User {
+  id                  String   @id @default(uuid())
+  email               String   @unique
+  passwordHash        String
+  name                String?
+  role                UserRole @default(USER)
+  refreshTokenVersion Int      @default(0)
+  emailVerified       Boolean  @default(false)
+  emailVerifiedAt     DateTime?
+  isActive            Boolean  @default(true)
+  lastLoginAt         DateTime?
+
+  jobs          Job[]
+  interviews    Interview[]
+  notes         Note[]
+  notifications Notification[]
+  stats         UserStats?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([isActive])
+}
+
+model Company {
+  id          String  @id @default(uuid())
+  name        String
+  website     String?
+  description String?
+
+  jobs Job[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+
+model Job {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  status      JobStatus @default(SAVED)
+  appliedAt   DateTime?
+  url         String?
+
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  interviews Interview[]
+  notes      Note[]
+  activities JobActivity[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([companyId])
+}
+
+model Interview {
+  id          String          @id @default(uuid())
+  title       String
+  scheduledAt DateTime
+  status      InterviewStatus @default(SCHEDULED)
+  location    String?
+  notes       String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId  String
+  job    Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([jobId])
+  @@index([scheduledAt])
+}
+
+model Note {
+  id      String @id @default(uuid())
+  title   String?
+  content String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId  String?
+  job    Job?   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([jobId])
+}
+
+model JobActivity {
+  id          String          @id @default(uuid())
+  type        JobActivityType
+  description String
+  metadata    Json?
+
+  jobId String
+  job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([jobId])
+  @@index([createdAt])
+}
+
+model Notification {
+  id      String           @id @default(uuid())
+  type    NotificationType
+  title   String
+  message String
+  read    Boolean          @default(false)
+  data    Json?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+}
+
+model UserStats {
+  id              String @id @default(uuid())
+  totalJobs       Int    @default(0)
+  appliedJobs     Int    @default(0)
+  interviewingJobs Int   @default(0)
+  offersReceived  Int    @default(0)
+  rejections      Int    @default(0)
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
