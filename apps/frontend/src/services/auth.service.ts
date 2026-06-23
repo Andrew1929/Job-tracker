@@ -52,7 +52,27 @@ async function apiRequest<T>(
   return (await response.json()) as T;
 }
 
+function assertAuthResponse(response: AuthResponse): asserts response is AuthResponse {
+  if (
+    !response?.user?.id ||
+    !response?.accessToken ||
+    !response?.refreshToken
+  ) {
+    throw new AuthApiError(
+      "Invalid authentication response from server",
+      500,
+    );
+  }
+}
+
+function assertUserResponse(user: User): asserts user is User {
+  if (!user?.id || !user?.email) {
+    throw new AuthApiError("Invalid user response from server", 500);
+  }
+}
+
 function persistAuthSession(response: AuthResponse): User {
+  assertAuthResponse(response);
   setAuthTokens(response.accessToken, response.refreshToken);
   return response.user;
 }
@@ -82,9 +102,12 @@ export async function getCurrentUser(): Promise<User> {
     throw new AuthApiError("Not authenticated", 401);
   }
 
-  return apiRequest<User>(AUTH_API_PATHS.me, {
+  const user = await apiRequest<User>(AUTH_API_PATHS.me, {
     accessToken,
   });
+
+  assertUserResponse(user);
+  return user;
 }
 
 export async function logout(): Promise<void> {

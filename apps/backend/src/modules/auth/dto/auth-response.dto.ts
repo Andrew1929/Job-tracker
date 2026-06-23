@@ -1,4 +1,4 @@
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, plainToInstance } from 'class-transformer';
 import { PublicUser } from '../../users/types/user.types';
 
 @Exclude()
@@ -34,7 +34,7 @@ export class UserResponseDto {
   updatedAt!: Date;
 
   static fromEntity(user: PublicUser): UserResponseDto {
-    return {
+    return plainToInstance(UserResponseDto, {
       id: user.id,
       email: user.email,
       name: user.name,
@@ -45,7 +45,7 @@ export class UserResponseDto {
       lastLoginAt: user.lastLoginAt,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
-    };
+    });
   }
 }
 
@@ -65,11 +65,11 @@ export class AuthResponseDto {
     accessToken: string;
     refreshToken: string;
   }): AuthResponseDto {
-    return {
+    return plainToInstance(AuthResponseDto, {
       user: UserResponseDto.fromEntity(result.user),
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,
-    };
+    });
   }
 }
 
@@ -85,10 +85,7 @@ export class AccessTokenResponseDto {
     accessToken: string;
     refreshToken: string;
   }): AccessTokenResponseDto {
-    return {
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-    };
+    return plainToInstance(AccessTokenResponseDto, tokens);
   }
 }
 
@@ -98,6 +95,6 @@ export class MessageResponseDto {
   message!: string;
 
   static create(message: string): MessageResponseDto {
-    return { message };
+    return plainToInstance(MessageResponseDto, { message });
   }
 }
