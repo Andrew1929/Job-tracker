@@ -1,10 +1,8 @@
 "use client";
 
-import { useState } from "react";
-
+import { useLogout } from "@/components/features/auth/logout";
 import { Button } from "@/components/ui/button";
-import { getErrorMessage } from "@/lib/auth/api-error";
-import { useAuth } from "@/hooks/useAuth";
+import { AUTH_UI_LABELS } from "@/constants/auth-ui.constants";
 import { cn } from "@/lib/utils";
 
 type LogoutButtonProps = {
@@ -12,21 +10,7 @@ type LogoutButtonProps = {
 };
 
 export function LogoutButton({ className }: LogoutButtonProps) {
-  const { logout } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleLogout = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      await logout();
-    } catch (err) {
-      setError(getErrorMessage(err));
-      setIsLoading(false);
-    }
-  };
+  const { logout, isLoading, error } = useLogout();
 
   return (
     <div className={cn("flex flex-col items-end gap-1", className)}>
@@ -34,12 +18,12 @@ export function LogoutButton({ className }: LogoutButtonProps) {
         type="button"
         variant="outline"
         size="sm"
-        onClick={handleLogout}
+        onClick={() => void logout()}
         disabled={isLoading}
         aria-busy={isLoading}
         className="border-destructive/30 text-destructive hover:bg-destructive/5 hover:text-destructive"
       >
-        {isLoading ? "Logging out…" : "Logout"}
+        {isLoading ? AUTH_UI_LABELS.loggingOut : AUTH_UI_LABELS.logout}
       </Button>
 
       {error ? (

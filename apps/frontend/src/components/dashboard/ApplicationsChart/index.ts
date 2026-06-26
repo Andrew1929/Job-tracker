@@ -1,0 +1,1 @@
+export { ApplicationsChart } from "./ApplicationsChart";
