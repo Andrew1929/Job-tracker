@@ -6,20 +6,22 @@ import type { SelectOption } from "@/types/select-option.types";
 
 type FilterSelectProps = {
   id: string;
-  prefix: string;
+  prefix?: string;
+  ariaLabel?: string;
   value: string;
   options: readonly SelectOption[];
   onChange: (value: string) => void;
   className?: string;
 };
 
-function getDisplayLabel(prefix: string, option: SelectOption): string {
-  return `${prefix}: ${option.label}`;
+function getDisplayLabel(prefix: string | undefined, option: SelectOption): string {
+  return prefix ? `${prefix}: ${option.label}` : option.label;
 }
 
 export function FilterSelect({
   id,
   prefix,
+  ariaLabel,
   value,
   options,
   onChange,
@@ -32,7 +34,7 @@ export function FilterSelect({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         className="flex h-10 min-w-[140px] appearance-none rounded-lg border border-input bg-card py-2 pl-3 pr-9 text-sm text-foreground shadow-none transition-colors focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-        aria-label={prefix}
+        aria-label={ariaLabel ?? prefix ?? "Filter"}
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
