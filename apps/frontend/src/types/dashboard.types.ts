@@ -1,3 +1,5 @@
+import type { JobStatus } from "@/types/job-status.types";
+
 export type TrendDirection = "up" | "down";
 
 export type StatCardData = {
@@ -24,7 +26,10 @@ export type UpcomingInterview = {
   dateTime: string;
 };
 
-export type ApplicationStatus = "Interview" | "Applied" | "Offer";
+export type ApplicationStatus = Extract<
+  JobStatus,
+  "Interview" | "Applied" | "Offer"
+>;
 
 export type RecentApplication = {
   id: string;

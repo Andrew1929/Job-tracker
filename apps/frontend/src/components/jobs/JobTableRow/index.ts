@@ -1,0 +1,1 @@
+export { JobTableRow } from "./JobTableRow";
