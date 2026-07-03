@@ -5,10 +5,11 @@ import type { JobListItem } from "@/types/jobs.types";
 
 type JobsTableProps = {
   jobs: JobListItem[];
+  onEditJob: (job: JobListItem) => void;
   className?: string;
 };
 
-export function JobsTable({ jobs, className }: JobsTableProps) {
+export function JobsTable({ jobs, onEditJob, className }: JobsTableProps) {
   return (
     <div className={cn("overflow-x-auto", className)}>
       <table className="w-full min-w-[640px]">
@@ -42,7 +43,7 @@ export function JobsTable({ jobs, className }: JobsTableProps) {
         </thead>
         <tbody>
           {jobs.map((job) => (
-            <JobTableRow key={job.id} job={job} />
+            <JobTableRow key={job.id} job={job} onEdit={onEditJob} />
           ))}
         </tbody>
       </table>

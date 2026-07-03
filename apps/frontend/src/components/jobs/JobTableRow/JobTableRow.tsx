@@ -1,16 +1,18 @@
-import { MoreVertical } from "lucide-react";
+import { Eye, Pencil } from "lucide-react";
 
+import { ActionMenu } from "@/components/shared/ActionMenu";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { Button } from "@/components/ui/button";
+import { JOBS_ROUTES } from "@/constants/jobs.constants";
 import { formatCurrency } from "@/lib/format/currency";
 
 import type { JobListItem } from "@/types/jobs.types";
 
 type JobTableRowProps = {
   job: JobListItem;
+  onEdit: (job: JobListItem) => void;
 };
 
-export function JobTableRow({ job }: JobTableRowProps) {
+export function JobTableRow({ job, onEdit }: JobTableRowProps) {
   return (
     <tr className="border-b border-border/60 last:border-0">
       <td className="py-4 pr-4">
@@ -29,15 +31,23 @@ export function JobTableRow({ job }: JobTableRowProps) {
         {formatCurrency(job.salary)}
       </td>
       <td className="py-4 text-right">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="size-8 text-muted-foreground"
-          aria-label={`Actions for ${job.company} ${job.position}`}
-        >
-          <MoreVertical />
-        </Button>
+        <ActionMenu
+          triggerAriaLabel={`Actions for ${job.company} ${job.position}`}
+          items={[
+            {
+              id: "view",
+              label: "View Details",
+              icon: Eye,
+              href: JOBS_ROUTES.details(job.id),
+            },
+            {
+              id: "edit",
+              label: "Edit Details",
+              icon: Pencil,
+              onSelect: () => onEdit(job),
+            },
+          ]}
+        />
       </td>
     </tr>
   );
