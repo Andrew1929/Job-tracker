@@ -42,7 +42,8 @@ export class TokenService {
       } satisfies AccessTokenPayload,
       {
         secret: this.authConfig.accessSecret,
-        expiresIn: this.authConfig.accessExpiresIn as `${number}${'s' | 'm' | 'h' | 'd'}`,
+        expiresIn: this.authConfig
+          .accessExpiresIn as `${number}${'s' | 'm' | 'h' | 'd'}`,
       },
     );
 
@@ -55,7 +56,8 @@ export class TokenService {
       } satisfies RefreshTokenPayload,
       {
         secret: this.authConfig.refreshSecret,
-        expiresIn: this.authConfig.refreshExpiresIn as `${number}${'s' | 'm' | 'h' | 'd'}`,
+        expiresIn: this.authConfig
+          .refreshExpiresIn as `${number}${'s' | 'm' | 'h' | 'd'}`,
       },
     );
 

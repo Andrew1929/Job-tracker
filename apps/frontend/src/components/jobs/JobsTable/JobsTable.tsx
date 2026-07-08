@@ -1,25 +1,26 @@
 import { JobTableRow } from "@/components/jobs/JobTableRow";
 import { cn } from "@/lib/utils";
 
-import type { JobListItem } from "@/types/jobs.types";
+import type { Job } from "@/types/jobs.types";
 
 type JobsTableProps = {
-  jobs: JobListItem[];
-  onEditJob: (job: JobListItem) => void;
+  jobs: Job[];
+  onEdit: (job: Job) => void;
+  onDelete: (job: Job) => void;
   className?: string;
 };
 
-export function JobsTable({ jobs, onEditJob, className }: JobsTableProps) {
+export function JobsTable({ jobs, onEdit, onDelete, className }: JobsTableProps) {
   return (
     <div className={cn("overflow-x-auto", className)}>
       <table className="w-full min-w-[640px]">
         <thead>
           <tr className="border-b border-border/60 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
             <th scope="col" className="pb-3 pr-4 font-medium">
-              Company
+              Title
             </th>
             <th scope="col" className="pb-3 pr-4 font-medium">
-              Position
+              Company
             </th>
             <th scope="col" className="pb-3 pr-4 font-medium">
               Status
@@ -30,12 +31,6 @@ export function JobsTable({ jobs, onEditJob, className }: JobsTableProps) {
             >
               Applied
             </th>
-            <th
-              scope="col"
-              className="hidden pb-3 pr-4 font-medium md:table-cell"
-            >
-              Salary
-            </th>
             <th scope="col" className="pb-3 text-right font-medium">
               <span className="sr-only">Actions</span>
             </th>
@@ -43,7 +38,12 @@ export function JobsTable({ jobs, onEditJob, className }: JobsTableProps) {
         </thead>
         <tbody>
           {jobs.map((job) => (
-            <JobTableRow key={job.id} job={job} onEdit={onEditJob} />
+            <JobTableRow
+              key={job.id}
+              job={job}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
           ))}
         </tbody>
       </table>

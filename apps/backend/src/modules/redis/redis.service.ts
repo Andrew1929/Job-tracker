@@ -15,11 +15,7 @@ export class RedisService implements OnModuleDestroy {
     return [prefix, ...parts].join(':');
   }
 
-  async set(
-    key: string,
-    value: string,
-    ttlSeconds?: number,
-  ): Promise<void> {
+  async set(key: string, value: string, ttlSeconds?: number): Promise<void> {
     if (ttlSeconds) {
       await this.client.set(key, value, 'EX', ttlSeconds);
       return;
@@ -69,19 +65,11 @@ export class RedisService implements OnModuleDestroy {
   }
 
   getAuthRefreshKey(userId: string, sessionId: string): string {
-    return this.buildKey(
-      REDIS_KEY_PREFIX.AUTH_REFRESH,
-      userId,
-      sessionId,
-    );
+    return this.buildKey(REDIS_KEY_PREFIX.AUTH_REFRESH, userId, sessionId);
   }
 
   getNotificationKey(userId: string, notificationId: string): string {
-    return this.buildKey(
-      REDIS_KEY_PREFIX.NOTIFICATION,
-      userId,
-      notificationId,
-    );
+    return this.buildKey(REDIS_KEY_PREFIX.NOTIFICATION, userId, notificationId);
   }
 
   getAnalyticsKey(userId: string, metric: string): string {

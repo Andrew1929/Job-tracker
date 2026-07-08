@@ -1,1 +1,0 @@
-export { JobAttachmentsCard } from "./JobAttachmentsCard";

@@ -5,6 +5,7 @@ import { AppConfigModule } from './config/config.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { AuthModule } from './modules/auth/auth.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { JobsModule } from './modules/jobs/jobs.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { RedisModule } from './modules/redis/redis.module';
@@ -19,6 +20,7 @@ import { AppService } from './app.service';
     RedisModule,
     UsersModule,
     AuthModule,
+    JobsModule,
     NotificationModule,
     AnalyticsModule,
   ],

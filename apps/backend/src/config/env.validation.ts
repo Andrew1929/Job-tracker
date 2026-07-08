@@ -62,7 +62,9 @@ export class EnvironmentVariables {
   AUTH_USE_COOKIES: string = 'false';
 }
 
-export function validate(config: Record<string, unknown>): EnvironmentVariables {
+export function validate(
+  config: Record<string, unknown>,
+): EnvironmentVariables {
   const validatedConfig = plainToInstance(EnvironmentVariables, config, {
     enableImplicitConversion: true,
   });

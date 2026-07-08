@@ -1,55 +1,101 @@
 "use client";
 
-import { useState } from "react";
+import { Briefcase } from "lucide-react";
 
-import { JobsFilters } from "@/components/jobs/JobsFilters";
 import { JobsTable } from "@/components/jobs/JobsTable";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { ErrorState } from "@/components/shared/ErrorState";
 import { Pagination } from "@/components/shared/Pagination";
-import { Card, CardContent } from "@/components/ui/card";
-import { JOBS_TOTAL_PAGES } from "@/constants/jobs.constants";
+import { Skeleton } from "@/components/shared/Skeleton";
+import { cn } from "@/lib/utils";
 
-import type { JobListItem, JobsViewMode } from "@/types/jobs.types";
+import type { Job } from "@/types/jobs.types";
 
 type JobsListProps = {
-  jobs: JobListItem[];
-  onEditJob: (job: JobListItem) => void;
+  jobs: Job[];
+  isLoading: boolean;
+  isError: boolean;
+  errorMessage: string;
+  isFetching: boolean;
+  hasActiveFilters: boolean;
+  page: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  onRetry: () => void;
+  onEdit: (job: Job) => void;
+  onDelete: (job: Job) => void;
 };
 
-export function JobsList({ jobs, onEditJob }: JobsListProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [companyFilter, setCompanyFilter] = useState("all");
-  const [viewMode, setViewMode] = useState<JobsViewMode>("list");
-  const [currentPage, setCurrentPage] = useState(1);
+const SKELETON_ROW_COUNT = 6;
+
+function JobsListSkeleton() {
+  return (
+    <div className="space-y-3" aria-hidden="true">
+      {Array.from({ length: SKELETON_ROW_COUNT }).map((_, index) => (
+        <div key={index} className="flex items-center gap-4">
+          <Skeleton className="h-5 flex-1" />
+          <Skeleton className="hidden h-5 w-32 sm:block" />
+          <Skeleton className="h-6 w-20" />
+          <Skeleton className="hidden h-5 w-24 sm:block" />
+          <Skeleton className="h-8 w-8 rounded-full" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function JobsList({
+  jobs,
+  isLoading,
+  isError,
+  errorMessage,
+  isFetching,
+  hasActiveFilters,
+  page,
+  totalPages,
+  onPageChange,
+  onRetry,
+  onEdit,
+  onDelete,
+}: JobsListProps) {
+  if (isLoading) {
+    return <JobsListSkeleton />;
+  }
+
+  if (isError) {
+    return <ErrorState message={errorMessage} onRetry={onRetry} />;
+  }
+
+  if (jobs.length === 0) {
+    return (
+      <EmptyState
+        icon={Briefcase}
+        title={hasActiveFilters ? "No jobs match your filters" : "No jobs yet"}
+        description={
+          hasActiveFilters
+            ? "Try adjusting your search or filters."
+            : "Add your first job to start tracking your applications."
+        }
+      />
+    );
+  }
 
   return (
-    <Card className="rounded-xl shadow-sm">
-      <CardContent className="space-y-6 p-6">
-        <JobsFilters
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          statusFilter={statusFilter}
-          onStatusFilterChange={setStatusFilter}
-          companyFilter={companyFilter}
-          onCompanyFilterChange={setCompanyFilter}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-        />
+    <div className="space-y-6">
+      <div
+        className={cn("transition-opacity", isFetching && "opacity-60")}
+        aria-busy={isFetching}
+      >
+        <JobsTable jobs={jobs} onEdit={onEdit} onDelete={onDelete} />
+      </div>
 
-        {viewMode === "list" ? (
-          <JobsTable jobs={jobs} onEditJob={onEditJob} />
-        ) : (
-          <p className="py-12 text-center text-sm text-muted-foreground">
-            Grid view coming soon.
-          </p>
-        )}
-
+      {totalPages > 1 ? (
         <Pagination
-          currentPage={currentPage}
-          totalPages={JOBS_TOTAL_PAGES}
-          onPageChange={setCurrentPage}
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
         />
-      </CardContent>
-    </Card>
+      ) : null}
+    </div>
   );
 }

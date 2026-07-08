@@ -1,5 +1,6 @@
 "use client";
 
+import { QueryProvider } from "@/components/providers/QueryProvider";
 import { AuthProvider } from "@/contexts/AuthProvider";
 
 type AppProvidersProps = {
@@ -7,5 +8,9 @@ type AppProvidersProps = {
 };
 
 export function AppProviders({ children }: AppProvidersProps) {
-  return <AuthProvider>{children}</AuthProvider>;
+  return (
+    <QueryProvider>
+      <AuthProvider>{children}</AuthProvider>
+    </QueryProvider>
+  );
 }

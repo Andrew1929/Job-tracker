@@ -1,110 +1,209 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, ExternalLink, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 
-import { JobAttachmentsCard } from "@/components/job-details/JobAttachmentsCard";
-import { JobDetailsHeader } from "@/components/job-details/JobDetailsHeader";
-import { JobInformationCard } from "@/components/job-details/JobInformationCard";
-import { JobNotesCard } from "@/components/job-details/JobNotesCard";
-import { JobTimelineCard } from "@/components/job-details/JobTimelineCard";
 import { JobFormDrawer } from "@/components/jobs/JobFormDrawer";
+import { JobStatusBadge } from "@/components/jobs/JobStatusBadge";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { ErrorState } from "@/components/shared/ErrorState";
+import { Skeleton } from "@/components/shared/Skeleton";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { JOBS_ROUTES } from "@/constants/jobs.constants";
+import { useDeleteJob, useJobQuery } from "@/hooks/jobs";
+import { getApiErrorMessage, isNotFoundError } from "@/lib/api/error-message";
+import { formatDateValue } from "@/lib/format/date";
 
-import type { JobFormValues } from "@/lib/validations/job.schema";
-import type { JobStatus } from "@/types/job-status.types";
-import type { JobDetails } from "@/types/jobs.types";
+import type { Job } from "@/types/jobs.types";
 
 type JobDetailsContentProps = {
-  job: JobDetails;
+  jobId: string;
 };
 
-function toJobFormValues(job: JobDetails): JobFormValues {
-  return {
-    company: job.company,
-    position: job.position,
-    status: job.status,
-    salary: String(job.salary),
-    jobPostingUrl: job.jobPostingUrl,
-    location: job.location,
-    notes: job.notes.join("\n"),
-  };
+function BackLink() {
+  return (
+    <Link
+      href={JOBS_ROUTES.list}
+      className="inline-flex items-center gap-2 rounded-sm text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+    >
+      <ArrowLeft className="size-4" aria-hidden="true" />
+      Back to Jobs
+    </Link>
+  );
 }
 
-export function JobDetailsContent({ job: initialJob }: JobDetailsContentProps) {
-  const [job, setJob] = useState<JobDetails>(initialJob);
+function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="grid gap-1 sm:grid-cols-[160px_1fr] sm:gap-4">
+      <dt className="text-sm font-medium text-muted-foreground">{label}</dt>
+      <dd className="text-sm text-foreground">{children}</dd>
+    </div>
+  );
+}
+
+export function JobDetailsContent({ jobId }: JobDetailsContentProps) {
+  const router = useRouter();
+  const jobQuery = useJobQuery(jobId);
+  const deleteJob = useDeleteJob();
+
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const handleStatusChange = (status: JobStatus) => {
-    setJob((previous) => ({ ...previous, status }));
-  };
-
-  const handleAddTag = (tag: string) => {
-    setJob((previous) =>
-      previous.tags.includes(tag)
-        ? previous
-        : { ...previous, tags: [...previous.tags, tag] },
+  if (jobQuery.isLoading) {
+    return (
+      <div className="space-y-6">
+        <BackLink />
+        <Skeleton className="h-9 w-64" />
+        <Skeleton className="h-48 w-full rounded-xl" />
+      </div>
     );
-  };
+  }
 
-  const handleEditSubmit = (values: JobFormValues) => {
-    setJob((previous) => ({
-      ...previous,
-      company: values.company,
-      position: values.position,
-      status: values.status,
-      salary: Number(values.salary),
-      location: values.location,
-      jobPostingUrl: values.jobPostingUrl,
-      notes: values.notes
-        .split("\n")
-        .map((note) => note.trim())
-        .filter(Boolean),
-    }));
-    setIsEditOpen(false);
+  if (jobQuery.isError) {
+    return (
+      <div className="space-y-6">
+        <BackLink />
+        {isNotFoundError(jobQuery.error) ? (
+          <EmptyState
+            title="Job not found"
+            description="This job may have been deleted or does not exist."
+          />
+        ) : (
+          <ErrorState
+            message={getApiErrorMessage(jobQuery.error)}
+            onRetry={() => void jobQuery.refetch()}
+          />
+        )}
+      </div>
+    );
+  }
+
+  const job = jobQuery.data as Job;
+
+  const handleConfirmDelete = async () => {
+    setDeleteError(null);
+    try {
+      await deleteJob.mutateAsync(job.id);
+      router.push(JOBS_ROUTES.list);
+    } catch (error) {
+      setDeleteError(getApiErrorMessage(error));
+    }
   };
 
   return (
     <div className="space-y-6">
-      <Link
-        href={JOBS_ROUTES.list}
-        className="inline-flex items-center gap-2 rounded-sm text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-      >
-        <ArrowLeft className="size-4" aria-hidden="true" />
-        Back to Jobs
-      </Link>
+      <BackLink />
 
-      <JobDetailsHeader
-        job={job}
-        onStatusChange={handleStatusChange}
-        onEdit={() => setIsEditOpen(true)}
-      />
-
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
-          <JobInformationCard
-            job={job}
-            onStatusChange={handleStatusChange}
-            onAddTag={handleAddTag}
-          />
-          <JobNotesCard notes={job.notes} />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            {job.title}
+          </h1>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-muted-foreground">
+              {job.company?.name ?? "No company"}
+            </span>
+            <JobStatusBadge status={job.status} />
+          </div>
         </div>
 
-        <div className="space-y-6">
-          <JobTimelineCard timeline={job.timeline} />
-          <JobAttachmentsCard attachments={job.attachments} />
+        <div className="flex items-center gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setIsEditOpen(true)}
+          >
+            <Pencil />
+            Edit
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="text-destructive hover:text-destructive"
+            onClick={() => {
+              setDeleteError(null);
+              setIsDeleteOpen(true);
+            }}
+          >
+            <Trash2 />
+            Delete
+          </Button>
         </div>
       </div>
+
+      <Card className="rounded-xl shadow-sm">
+        <CardHeader>
+          <CardTitle>Job information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <dl className="space-y-4">
+            <DetailRow label="Status">
+              <JobStatusBadge status={job.status} />
+            </DetailRow>
+            <DetailRow label="Company">
+              {job.company?.name ?? "—"}
+            </DetailRow>
+            <DetailRow label="Applied date">
+              {formatDateValue(job.appliedAt)}
+            </DetailRow>
+            <DetailRow label="Posting URL">
+              {job.url ? (
+                <a
+                  href={job.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-primary hover:underline"
+                >
+                  {job.url}
+                  <ExternalLink className="size-3.5" aria-hidden="true" />
+                </a>
+              ) : (
+                "—"
+              )}
+            </DetailRow>
+            <DetailRow label="Description">
+              {job.description ? (
+                <span className="whitespace-pre-line">{job.description}</span>
+              ) : (
+                "—"
+              )}
+            </DetailRow>
+            <DetailRow label="Created">
+              {formatDateValue(job.createdAt)}
+            </DetailRow>
+            <DetailRow label="Last updated">
+              {formatDateValue(job.updatedAt)}
+            </DetailRow>
+          </dl>
+        </CardContent>
+      </Card>
 
       {isEditOpen ? (
         <JobFormDrawer
           mode="edit"
-          initialValues={toJobFormValues(job)}
+          job={job}
           onClose={() => setIsEditOpen(false)}
-          onSubmit={handleEditSubmit}
         />
       ) : null}
+
+      <ConfirmDialog
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
+        title="Delete job"
+        description={`Delete "${job.title}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        destructive
+        isLoading={deleteJob.isPending}
+        errorMessage={deleteError}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }

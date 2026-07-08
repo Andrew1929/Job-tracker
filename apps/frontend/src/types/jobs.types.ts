@@ -1,39 +1,86 @@
-import type { JobStatus } from "@/types/job-status.types";
+/**
+ * Backend-aligned Jobs domain (mirrors the API `JobResponseDto`).
+ *
+ * Note: the shared mock status enum in `job-status.types.ts` still powers the
+ * not-yet-migrated Dashboard/Analytics/Kanban views, so it is intentionally
+ * left untouched. This file is the source of truth for the Jobs feature.
+ */
 
-export type JobsViewMode = "list" | "grid";
+export const JOB_STATUSES = [
+  "SAVED",
+  "APPLIED",
+  "INTERVIEWING",
+  "OFFER",
+  "REJECTED",
+  "WITHDRAWN",
+] as const;
 
-export type JobListItem = {
+export type JobStatus = (typeof JOB_STATUSES)[number];
+
+export type JobCompanySummary = {
   id: string;
-  company: string;
-  position: string;
-  status: JobStatus;
-  appliedDate: string;
-  salary: number;
+  name: string;
+  website: string | null;
+  description?: string | null;
 };
+
+export type Job = {
+  id: string;
+  title: string;
+  description?: string | null;
+  status: JobStatus;
+  appliedAt: string | null;
+  url: string | null;
+  company: JobCompanySummary | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PaginationMeta = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+};
+
+export type PaginatedJobs = {
+  items: Job[];
+  meta: PaginationMeta;
+};
+
+export const JOB_SORT_FIELDS = [
+  "createdAt",
+  "updatedAt",
+  "appliedAt",
+  "title",
+  "status",
+] as const;
+
+export type JobSortField = (typeof JOB_SORT_FIELDS)[number];
+
+export type SortOrder = "asc" | "desc";
+
+export type JobsQueryParams = {
+  page: number;
+  limit: number;
+  search?: string;
+  status?: JobStatus;
+  companyId?: string;
+  sortBy: JobSortField;
+  sortOrder: SortOrder;
+};
+
+export type CreateJobInput = {
+  title: string;
+  description?: string;
+  status?: JobStatus;
+  url?: string;
+  appliedAt?: string;
+  companyName?: string;
+};
+
+export type UpdateJobInput = Partial<CreateJobInput>;
 
 export type JobFormMode = "create" | "edit";
-
-export type JobTimelineStepState = "completed" | "current" | "upcoming";
-
-export type JobTimelineStep = {
-  readonly id: string;
-  readonly label: string;
-  readonly date?: string;
-  readonly state: JobTimelineStepState;
-};
-
-export type JobAttachment = {
-  readonly id: string;
-  readonly name: string;
-};
-
-export type JobDetails = JobListItem & {
-  readonly companyInitial: string;
-  readonly companyColor: string;
-  readonly location: string;
-  readonly jobPostingUrl: string;
-  readonly tags: readonly string[];
-  readonly notes: readonly string[];
-  readonly timeline: readonly JobTimelineStep[];
-  readonly attachments: readonly JobAttachment[];
-};

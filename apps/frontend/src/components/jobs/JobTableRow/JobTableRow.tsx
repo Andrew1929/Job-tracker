@@ -1,38 +1,36 @@
-import { Eye, Pencil } from "lucide-react";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 
+import { JobStatusBadge } from "@/components/jobs/JobStatusBadge";
 import { ActionMenu } from "@/components/shared/ActionMenu";
-import { StatusBadge } from "@/components/shared/StatusBadge";
 import { JOBS_ROUTES } from "@/constants/jobs.constants";
-import { formatCurrency } from "@/lib/format/currency";
+import { formatDateValue } from "@/lib/format/date";
 
-import type { JobListItem } from "@/types/jobs.types";
+import type { Job } from "@/types/jobs.types";
 
 type JobTableRowProps = {
-  job: JobListItem;
-  onEdit: (job: JobListItem) => void;
+  job: Job;
+  onEdit: (job: Job) => void;
+  onDelete: (job: Job) => void;
 };
 
-export function JobTableRow({ job, onEdit }: JobTableRowProps) {
+export function JobTableRow({ job, onEdit, onDelete }: JobTableRowProps) {
+  const companyName = job.company?.name ?? "—";
+
   return (
     <tr className="border-b border-border/60 last:border-0">
-      <td className="py-4 pr-4">
-        <span className="text-sm font-semibold text-foreground">
-          {job.company}
-        </span>
+      <td className="py-4 pr-4 text-sm font-semibold text-foreground">
+        {job.title}
       </td>
-      <td className="py-4 pr-4 text-sm text-foreground">{job.position}</td>
+      <td className="py-4 pr-4 text-sm text-foreground">{companyName}</td>
       <td className="py-4 pr-4">
-        <StatusBadge status={job.status} />
+        <JobStatusBadge status={job.status} />
       </td>
       <td className="hidden py-4 pr-4 text-sm text-muted-foreground sm:table-cell">
-        {job.appliedDate}
-      </td>
-      <td className="hidden py-4 pr-4 text-sm text-foreground md:table-cell">
-        {formatCurrency(job.salary)}
+        {formatDateValue(job.appliedAt)}
       </td>
       <td className="py-4 text-right">
         <ActionMenu
-          triggerAriaLabel={`Actions for ${job.company} ${job.position}`}
+          triggerAriaLabel={`Actions for ${job.title}`}
           items={[
             {
               id: "view",
@@ -45,6 +43,12 @@ export function JobTableRow({ job, onEdit }: JobTableRowProps) {
               label: "Edit Details",
               icon: Pencil,
               onSelect: () => onEdit(job),
+            },
+            {
+              id: "delete",
+              label: "Delete",
+              icon: Trash2,
+              onSelect: () => onDelete(job),
             },
           ]}
         />
