@@ -4,6 +4,7 @@ import {
   JobStatus,
   Prisma,
 } from '../../../../generated/prisma/client';
+import { AnalyticsService } from '../../analytics/services/analytics.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateJobDto } from '../dto/create-job.dto';
 import { QueryJobsDto } from '../dto/query-jobs.dto';
@@ -21,10 +22,11 @@ export class JobsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly companiesService: CompaniesService,
+    private readonly analyticsService: AnalyticsService,
   ) {}
 
   async create(userId: string, dto: CreateJobDto): Promise<JobDetail> {
-    return this.prisma.$transaction(async (tx) => {
+    const job = await this.prisma.$transaction(async (tx) => {
       const companyId = await this.companiesService.resolveCompanyId(tx, dto);
       const status = dto.status ?? JobStatus.SAVED;
 
@@ -41,6 +43,10 @@ export class JobsService {
         select: JOB_DETAIL_SELECT,
       });
     });
+
+    await this.analyticsService.invalidateCache(userId);
+
+    return job;
   }
 
   async findMany(userId: string, query: QueryJobsDto): Promise<PaginatedJobs> {
@@ -79,7 +85,7 @@ export class JobsService {
     id: string,
     dto: UpdateJobDto,
   ): Promise<JobDetail> {
-    return this.prisma.$transaction(async (tx) => {
+    const job = await this.prisma.$transaction(async (tx) => {
       const existing = await tx.job.findFirst({
         where: { id, userId },
         select: { id: true, status: true, appliedAt: true },
@@ -117,6 +123,10 @@ export class JobsService {
 
       return job;
     });
+
+    await this.analyticsService.invalidateCache(userId);
+
+    return job;
   }
 
   async remove(userId: string, id: string): Promise<void> {
@@ -127,6 +137,8 @@ export class JobsService {
     if (count === 0) {
       throw new NotFoundException('Job not found');
     }
+
+    await this.analyticsService.invalidateCache(userId);
   }
 
   private buildWhere(
@@ -186,7 +198,8 @@ export class JobsService {
         jobId,
         type: JobActivityType.STATUS_CHANGE,
         description: `Status changed from ${from} to ${to}`,
-        metadata: { from, to },
+        fromStatus: from,
+        toStatus: to,
       },
     });
   }

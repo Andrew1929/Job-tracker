@@ -19,10 +19,61 @@ enum UserRole {
 enum JobStatus {
   SAVED
   APPLIED
+  SCREENING
   INTERVIEWING
   OFFER
+  ACCEPTED
   REJECTED
   WITHDRAWN
+}
+
+enum JobPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum JobSource {
+  JOB_BOARD
+  COMPANY_WEBSITE
+  REFERRAL
+  RECRUITER
+  SOCIAL
+  EVENT
+  OTHER
+}
+
+enum RemoteType {
+  ONSITE
+  HYBRID
+  REMOTE
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  TEMPORARY
+}
+
+enum CompanySize {
+  STARTUP
+  SMALL
+  MEDIUM
+  LARGE
+  ENTERPRISE
+}
+
+enum InterviewType {
+  PHONE_SCREEN
+  TECHNICAL
+  BEHAVIORAL
+  SYSTEM_DESIGN
+  ONSITE
+  HR
+  FINAL
+  OTHER
 }
 
 enum InterviewStatus {
@@ -32,11 +83,18 @@ enum InterviewStatus {
   NO_SHOW
 }
 
+enum InterviewResult {
+  PENDING
+  PASSED
+  FAILED
+}
+
 enum JobActivityType {
   STATUS_CHANGE
-  NOTE_ADDED
-  INTERVIEW_SCHEDULED
-  FOLLOW_UP
+  NOTE
+  INTERVIEW
+  COMMUNICATION
+  REMINDER
   CUSTOM
 }
 
@@ -48,22 +106,22 @@ enum NotificationType {
 }
 
 model User {
-  id                  String   @id @default(uuid())
-  email               String   @unique
+  id                  String    @id @default(uuid())
+  email               String    @unique
   passwordHash        String
   name                String?
-  role                UserRole @default(USER)
-  refreshTokenVersion Int      @default(0)
-  emailVerified       Boolean  @default(false)
+  role                UserRole  @default(USER)
+  refreshTokenVersion Int       @default(0)
+  emailVerified       Boolean   @default(false)
   emailVerifiedAt     DateTime?
-  isActive            Boolean  @default(true)
+  isActive            Boolean   @default(true)
   lastLoginAt         DateTime?
 
-  jobs          Job[]
-  interviews    Interview[]
-  notes         Note[]
-  notifications Notification[]
-  stats         UserStats?
+  jobs           Job[]
+  interviews     Interview[]
+  notes          Note[]
+  notifications  Notification[]
+  companyReviews CompanyReview[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -73,27 +131,62 @@ model User {
 }
 
 model Company {
-  id          String  @id @default(uuid())
-  name        String  @unique
+  id          String       @id @default(uuid())
+  name        String       @unique
   website     String?
   description String?
+  industry    String?
+  size        CompanySize?
+  location    String?
+  logoUrl     String?
 
-  jobs Job[]
+  jobs    Job[]
+  reviews CompanyReview[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model Job {
-  id          String    @id @default(uuid())
-  title       String
-  description String?
-  status      JobStatus @default(SAVED)
-  appliedAt   DateTime?
-  url         String?
+model CompanyReview {
+  id            String  @id @default(uuid())
+  rating        Int?
+  processRating Int?
+  review        String?
 
   userId    String
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, companyId])
+  @@index([companyId])
+}
+
+model Job {
+  id             String          @id @default(uuid())
+  title          String
+  description    String?
+  status         JobStatus       @default(SAVED)
+  priority       JobPriority     @default(MEDIUM)
+  source         JobSource?
+  location       String?
+  remoteType     RemoteType?
+  employmentType EmploymentType?
+  salaryMin      Int?
+  salaryMax      Int?
+  salaryCurrency String?
+  url            String?
+
+  appliedAt      DateTime?
+  nextActionDate DateTime?
+  closedAt       DateTime?
+  archivedAt     DateTime?
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   companyId String?
   company   Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
 
@@ -105,17 +198,26 @@ model Job {
   updatedAt DateTime @updatedAt
 
   @@index([userId])
-  @@index([status])
   @@index([companyId])
+  @@index([userId, status])
+  @@index([nextActionDate])
 }
 
 model Interview {
-  id          String          @id @default(uuid())
-  title       String
-  scheduledAt DateTime
-  status      InterviewStatus @default(SCHEDULED)
-  location    String?
-  notes       String?
+  id              String          @id @default(uuid())
+  type            InterviewType
+  status          InterviewStatus @default(SCHEDULED)
+  result          InterviewResult @default(PENDING)
+  scheduledAt     DateTime
+  completedAt     DateTime?
+  durationMinutes Int?
+  remoteType      RemoteType?
+  location        String?
+  interviewers    String[]        @default([])
+  prepNotes       String?
+  feedback        String?
+  rating          Int?
+  difficulty      Int?
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -128,29 +230,31 @@ model Interview {
   @@index([userId])
   @@index([jobId])
   @@index([scheduledAt])
+  @@index([jobId, status])
 }
 
 model Note {
   id      String @id @default(uuid())
-  title   String?
   content String
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  jobId  String?
-  job    Job?   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId  String
+  job    Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId])
   @@index([jobId])
+  @@index([userId])
 }
 
 model JobActivity {
   id          String          @id @default(uuid())
   type        JobActivityType
   description String
+  fromStatus  JobStatus?
+  toStatus    JobStatus?
   metadata    Json?
 
   jobId String
@@ -160,6 +264,7 @@ model JobActivity {
 
   @@index([jobId])
   @@index([createdAt])
+  @@index([jobId, type])
 }
 
 model Notification {
@@ -168,6 +273,7 @@ model Notification {
   title   String
   message String
   read    Boolean          @default(false)
+  readAt  DateTime?
   data    Json?
 
   userId String
@@ -179,19 +285,4 @@ model Notification {
   @@index([userId])
   @@index([read])
   @@index([createdAt])
-}
-
-model UserStats {
-  id              String @id @default(uuid())
-  totalJobs       Int    @default(0)
-  appliedJobs     Int    @default(0)
-  interviewingJobs Int   @default(0)
-  offersReceived  Int    @default(0)
-  rejections      Int    @default(0)
-
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }

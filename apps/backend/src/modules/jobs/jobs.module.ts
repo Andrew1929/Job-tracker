@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
+import { AnalyticsModule } from '../analytics/analytics.module';
 import { JobsController } from './controllers/jobs.controller';
 import { CompaniesService } from './services/companies.service';
 import { JobsService } from './services/jobs.service';
 
 @Module({
+  imports: [AnalyticsModule],
   controllers: [JobsController],
   providers: [JobsService, CompaniesService],
 })
