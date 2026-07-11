@@ -9,13 +9,45 @@
 export const JOB_STATUSES = [
   "SAVED",
   "APPLIED",
+  "SCREENING",
   "INTERVIEWING",
   "OFFER",
+  "ACCEPTED",
   "REJECTED",
   "WITHDRAWN",
 ] as const;
 
 export type JobStatus = (typeof JOB_STATUSES)[number];
+
+export const JOB_PRIORITIES = ["LOW", "MEDIUM", "HIGH"] as const;
+
+export type JobPriority = (typeof JOB_PRIORITIES)[number];
+
+export const JOB_SOURCES = [
+  "JOB_BOARD",
+  "COMPANY_WEBSITE",
+  "REFERRAL",
+  "RECRUITER",
+  "SOCIAL",
+  "EVENT",
+  "OTHER",
+] as const;
+
+export type JobSource = (typeof JOB_SOURCES)[number];
+
+export const REMOTE_TYPES = ["ONSITE", "HYBRID", "REMOTE"] as const;
+
+export type RemoteType = (typeof REMOTE_TYPES)[number];
+
+export const EMPLOYMENT_TYPES = [
+  "FULL_TIME",
+  "PART_TIME",
+  "CONTRACT",
+  "INTERNSHIP",
+  "TEMPORARY",
+] as const;
+
+export type EmploymentType = (typeof EMPLOYMENT_TYPES)[number];
 
 export type JobCompanySummary = {
   id: string;
@@ -29,7 +61,16 @@ export type Job = {
   title: string;
   description?: string | null;
   status: JobStatus;
+  priority: JobPriority;
+  source: JobSource | null;
+  location: string | null;
+  remoteType: RemoteType | null;
+  employmentType: EmploymentType | null;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  salaryCurrency: string | null;
   appliedAt: string | null;
+  nextActionDate: string | null;
   url: string | null;
   company: JobCompanySummary | null;
   createdAt: string;
@@ -76,8 +117,17 @@ export type CreateJobInput = {
   title: string;
   description?: string;
   status?: JobStatus;
+  priority?: JobPriority;
+  source?: JobSource;
+  location?: string;
+  remoteType?: RemoteType;
+  employmentType?: EmploymentType;
+  salaryMin?: number;
+  salaryMax?: number;
+  salaryCurrency?: string;
   url?: string;
   appliedAt?: string;
+  nextActionDate?: string;
   companyName?: string;
 };
 

@@ -6,26 +6,33 @@ const COMPANY_SUMMARY_SELECT = {
   website: true,
 } satisfies Prisma.CompanySelect;
 
-export const JOB_LIST_SELECT = {
+const JOB_CORE_SELECT = {
   id: true,
   title: true,
   status: true,
+  priority: true,
+  source: true,
+  location: true,
+  remoteType: true,
+  employmentType: true,
+  salaryMin: true,
+  salaryMax: true,
+  salaryCurrency: true,
   appliedAt: true,
+  nextActionDate: true,
   url: true,
   createdAt: true,
   updatedAt: true,
+} satisfies Prisma.JobSelect;
+
+export const JOB_LIST_SELECT = {
+  ...JOB_CORE_SELECT,
   company: { select: COMPANY_SUMMARY_SELECT },
 } satisfies Prisma.JobSelect;
 
 export const JOB_DETAIL_SELECT = {
-  id: true,
-  title: true,
+  ...JOB_CORE_SELECT,
   description: true,
-  status: true,
-  appliedAt: true,
-  url: true,
-  createdAt: true,
-  updatedAt: true,
   company: {
     select: { ...COMPANY_SUMMARY_SELECT, description: true },
   },

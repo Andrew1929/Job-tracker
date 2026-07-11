@@ -8,13 +8,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { JOB_STATUS_OPTIONS } from "@/constants/jobs.constants";
+import {
+  EMPLOYMENT_TYPE_OPTIONS,
+  JOB_PRIORITY_OPTIONS,
+  JOB_SOURCE_OPTIONS,
+  JOB_STATUS_OPTIONS,
+  REMOTE_TYPE_OPTIONS,
+} from "@/constants/jobs.constants";
 import {
   EMPTY_JOB_FORM_VALUES,
   jobFormSchema,
   type JobFormValues,
 } from "@/lib/validations/job.schema";
-import type { JobStatus } from "@/types/jobs.types";
 
 type JobFormProps = {
   defaultValues?: JobFormValues;
@@ -112,10 +117,144 @@ export function JobForm({
               label="Status"
               value={field.value}
               options={JOB_STATUS_OPTIONS}
-              onChange={(value) => field.onChange(value as JobStatus)}
+              onChange={field.onChange}
             />
           )}
         />
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Controller
+          control={control}
+          name="priority"
+          render={({ field }) => (
+            <SelectField
+              id="job-priority"
+              label="Priority"
+              value={field.value}
+              options={JOB_PRIORITY_OPTIONS}
+              onChange={field.onChange}
+            />
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="source"
+          render={({ field }) => (
+            <SelectField
+              id="job-source"
+              label="Source"
+              value={field.value}
+              options={JOB_SOURCE_OPTIONS}
+              onChange={field.onChange}
+            />
+          )}
+        />
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Controller
+          control={control}
+          name="employmentType"
+          render={({ field }) => (
+            <SelectField
+              id="job-employment-type"
+              label="Employment type"
+              value={field.value}
+              options={EMPLOYMENT_TYPE_OPTIONS}
+              onChange={field.onChange}
+            />
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="remoteType"
+          render={({ field }) => (
+            <SelectField
+              id="job-remote-type"
+              label="Work mode"
+              value={field.value}
+              options={REMOTE_TYPE_OPTIONS}
+              onChange={field.onChange}
+            />
+          )}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="job-location">Location</Label>
+        <Input
+          id="job-location"
+          type="text"
+          placeholder="e.g. Berlin, Germany"
+          aria-invalid={Boolean(errors.location)}
+          aria-describedby={errors.location ? "job-location-error" : undefined}
+          {...register("location")}
+        />
+        <FieldError id="job-location-error" message={errors.location?.message} />
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-3">
+        <div className="space-y-2">
+          <Label htmlFor="job-salary-min">Salary min</Label>
+          <Input
+            id="job-salary-min"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            placeholder="e.g. 60000"
+            aria-invalid={Boolean(errors.salaryMin)}
+            aria-describedby={
+              errors.salaryMin ? "job-salary-min-error" : undefined
+            }
+            {...register("salaryMin")}
+          />
+          <FieldError
+            id="job-salary-min-error"
+            message={errors.salaryMin?.message}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="job-salary-max">Salary max</Label>
+          <Input
+            id="job-salary-max"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            placeholder="e.g. 90000"
+            aria-invalid={Boolean(errors.salaryMax)}
+            aria-describedby={
+              errors.salaryMax ? "job-salary-max-error" : undefined
+            }
+            {...register("salaryMax")}
+          />
+          <FieldError
+            id="job-salary-max-error"
+            message={errors.salaryMax?.message}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="job-salary-currency">Currency</Label>
+          <Input
+            id="job-salary-currency"
+            type="text"
+            placeholder="USD"
+            maxLength={3}
+            aria-invalid={Boolean(errors.salaryCurrency)}
+            aria-describedby={
+              errors.salaryCurrency ? "job-salary-currency-error" : undefined
+            }
+            {...register("salaryCurrency")}
+          />
+          <FieldError
+            id="job-salary-currency-error"
+            message={errors.salaryCurrency?.message}
+          />
+        </div>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
@@ -137,17 +276,34 @@ export function JobForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="job-url">Job posting URL</Label>
+          <Label htmlFor="job-next-action-at">Next action date</Label>
           <Input
-            id="job-url"
-            type="url"
-            placeholder="https://..."
-            aria-invalid={Boolean(errors.url)}
-            aria-describedby={errors.url ? "job-url-error" : undefined}
-            {...register("url")}
+            id="job-next-action-at"
+            type="date"
+            aria-invalid={Boolean(errors.nextActionDate)}
+            aria-describedby={
+              errors.nextActionDate ? "job-next-action-at-error" : undefined
+            }
+            {...register("nextActionDate")}
           />
-          <FieldError id="job-url-error" message={errors.url?.message} />
+          <FieldError
+            id="job-next-action-at-error"
+            message={errors.nextActionDate?.message}
+          />
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="job-url">Job posting URL</Label>
+        <Input
+          id="job-url"
+          type="url"
+          placeholder="https://..."
+          aria-invalid={Boolean(errors.url)}
+          aria-describedby={errors.url ? "job-url-error" : undefined}
+          {...register("url")}
+        />
+        <FieldError id="job-url-error" message={errors.url?.message} />
       </div>
 
       <div className="space-y-2">

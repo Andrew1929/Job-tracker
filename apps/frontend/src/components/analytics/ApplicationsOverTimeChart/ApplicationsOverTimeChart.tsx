@@ -1,42 +1,45 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { APPLICATIONS_OVER_TIME_DATA } from "@/constants/analytics.constants";
+import {
+  buildYAxisTicks,
+  computeChartMax,
+} from "@/lib/analytics/map-analytics";
 import { buildLinePath, buildLinePoints } from "@/lib/chart/line-path";
 import { cn } from "@/lib/utils";
 
+import type { AnalyticsTimeSeriesPoint } from "@/types/analytics.types";
+
 type ApplicationsOverTimeChartProps = {
+  data: AnalyticsTimeSeriesPoint[];
   className?: string;
 };
 
 const CHART_HEIGHT = 240;
 const CHART_WIDTH = 640;
 const CHART_PADDING = { top: 16, right: 8, bottom: 32, left: 36 };
-const Y_AXIS_TICKS = [0, 10, 20, 30, 40];
-const MAX_VALUE = 40;
 
 export function ApplicationsOverTimeChart({
+  data,
   className,
 }: ApplicationsOverTimeChartProps) {
-  const labels = APPLICATIONS_OVER_TIME_DATA.map((point) => point.label);
-  const applicationValues = APPLICATIONS_OVER_TIME_DATA.map(
-    (point) => point.applications,
-  );
-  const interviewValues = APPLICATIONS_OVER_TIME_DATA.map(
-    (point) => point.interviews,
-  );
+  const labels = data.map((point) => point.label);
+  const applicationValues = data.map((point) => point.applications);
+  const interviewValues = data.map((point) => point.interviews);
+  const maxValue = computeChartMax(data);
+  const yAxisTicks = buildYAxisTicks(maxValue);
 
   const applicationsPath = buildLinePath(
     applicationValues,
     CHART_WIDTH,
     CHART_HEIGHT,
     CHART_PADDING,
-    MAX_VALUE,
+    maxValue,
   );
   const interviewsPath = buildLinePath(
     interviewValues,
     CHART_WIDTH,
     CHART_HEIGHT,
     CHART_PADDING,
-    MAX_VALUE,
+    maxValue,
   );
   const applicationPoints = buildLinePoints(
     applicationValues,
@@ -44,32 +47,33 @@ export function ApplicationsOverTimeChart({
     CHART_WIDTH,
     CHART_HEIGHT,
     CHART_PADDING,
-    MAX_VALUE,
+    maxValue,
   );
 
   const innerHeight =
     CHART_HEIGHT - CHART_PADDING.top - CHART_PADDING.bottom;
 
   return (
-    <Card className={cn("rounded-xl shadow-sm", className)}>
+    <Card className={cn("min-w-0 rounded-xl shadow-sm", className)}>
       <CardHeader className="pb-4">
         <CardTitle className="text-base font-semibold">
           Applications Over Time
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-0">
-        <div className="w-full overflow-x-auto">
+      <CardContent className="min-w-0 pt-0">
+        <div className="w-full max-w-full">
           <svg
             viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
-            className="h-auto min-w-[320px] w-full"
+            className="h-auto w-full max-w-full"
+            preserveAspectRatio="xMidYMid meet"
             role="img"
             aria-label="Line chart showing applications and interviews over time"
           >
-            {Y_AXIS_TICKS.map((tick) => {
+            {yAxisTicks.map((tick) => {
               const y =
                 CHART_PADDING.top +
                 innerHeight -
-                (tick / MAX_VALUE) * innerHeight;
+                (tick / maxValue) * innerHeight;
 
               return (
                 <g key={tick}>

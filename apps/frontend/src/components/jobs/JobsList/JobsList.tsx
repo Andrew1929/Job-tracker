@@ -36,6 +36,7 @@ function JobsListSkeleton() {
           <Skeleton className="h-5 flex-1" />
           <Skeleton className="hidden h-5 w-32 sm:block" />
           <Skeleton className="h-6 w-20" />
+          <Skeleton className="hidden h-6 w-16 md:block" />
           <Skeleton className="hidden h-5 w-24 sm:block" />
           <Skeleton className="h-8 w-8 rounded-full" />
         </div>

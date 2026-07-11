@@ -1,5 +1,6 @@
 import { Eye, Pencil, Trash2 } from "lucide-react";
 
+import { JobPriorityBadge } from "@/components/jobs/JobPriorityBadge";
 import { JobStatusBadge } from "@/components/jobs/JobStatusBadge";
 import { ActionMenu } from "@/components/shared/ActionMenu";
 import { JOBS_ROUTES } from "@/constants/jobs.constants";
@@ -24,6 +25,9 @@ export function JobTableRow({ job, onEdit, onDelete }: JobTableRowProps) {
       <td className="py-4 pr-4 text-sm text-foreground">{companyName}</td>
       <td className="py-4 pr-4">
         <JobStatusBadge status={job.status} />
+      </td>
+      <td className="hidden py-4 pr-4 md:table-cell">
+        <JobPriorityBadge priority={job.priority} />
       </td>
       <td className="hidden py-4 pr-4 text-sm text-muted-foreground sm:table-cell">
         {formatDateValue(job.appliedAt)}

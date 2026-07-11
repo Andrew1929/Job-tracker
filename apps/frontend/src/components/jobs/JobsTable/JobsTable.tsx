@@ -27,6 +27,12 @@ export function JobsTable({ jobs, onEdit, onDelete, className }: JobsTableProps)
             </th>
             <th
               scope="col"
+              className="hidden pb-3 pr-4 font-medium md:table-cell"
+            >
+              Priority
+            </th>
+            <th
+              scope="col"
               className="hidden pb-3 pr-4 font-medium sm:table-cell"
             >
               Applied

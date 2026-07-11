@@ -21,8 +21,17 @@ function jobToFormValues(job: Job): JobFormValues {
     title: job.title,
     companyName: job.company?.name ?? "",
     status: job.status,
+    priority: job.priority,
+    source: job.source ?? "",
+    employmentType: job.employmentType ?? "",
+    remoteType: job.remoteType ?? "",
+    location: job.location ?? "",
+    salaryMin: job.salaryMin != null ? String(job.salaryMin) : "",
+    salaryMax: job.salaryMax != null ? String(job.salaryMax) : "",
+    salaryCurrency: job.salaryCurrency ?? "",
     url: job.url ?? "",
     appliedAt: job.appliedAt ? job.appliedAt.slice(0, 10) : "",
+    nextActionDate: job.nextActionDate ? job.nextActionDate.slice(0, 10) : "",
     description: job.description ?? "",
   };
 }

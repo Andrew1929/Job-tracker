@@ -6,6 +6,7 @@ import { ArrowLeft, ExternalLink, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { JobFormDrawer } from "@/components/jobs/JobFormDrawer";
+import { JobPriorityBadge } from "@/components/jobs/JobPriorityBadge";
 import { JobStatusBadge } from "@/components/jobs/JobStatusBadge";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -13,10 +14,16 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { Skeleton } from "@/components/shared/Skeleton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { JOBS_ROUTES } from "@/constants/jobs.constants";
+import {
+  EMPLOYMENT_TYPE_LABELS,
+  JOBS_ROUTES,
+  JOB_SOURCE_LABELS,
+  REMOTE_TYPE_LABELS,
+} from "@/constants/jobs.constants";
 import { useDeleteJob, useJobQuery } from "@/hooks/jobs";
 import { getApiErrorMessage, isNotFoundError } from "@/lib/api/error-message";
 import { formatDateValue } from "@/lib/format/date";
+import { formatSalaryRange } from "@/lib/format/salary";
 
 import type { Job } from "@/types/jobs.types";
 
@@ -147,11 +154,36 @@ export function JobDetailsContent({ jobId }: JobDetailsContentProps) {
             <DetailRow label="Status">
               <JobStatusBadge status={job.status} />
             </DetailRow>
+            <DetailRow label="Priority">
+              <JobPriorityBadge priority={job.priority} />
+            </DetailRow>
             <DetailRow label="Company">
               {job.company?.name ?? "—"}
             </DetailRow>
+            <DetailRow label="Location">{job.location ?? "—"}</DetailRow>
+            <DetailRow label="Work mode">
+              {job.remoteType ? REMOTE_TYPE_LABELS[job.remoteType] : "—"}
+            </DetailRow>
+            <DetailRow label="Employment type">
+              {job.employmentType
+                ? EMPLOYMENT_TYPE_LABELS[job.employmentType]
+                : "—"}
+            </DetailRow>
+            <DetailRow label="Source">
+              {job.source ? JOB_SOURCE_LABELS[job.source] : "—"}
+            </DetailRow>
+            <DetailRow label="Salary">
+              {formatSalaryRange(
+                job.salaryMin,
+                job.salaryMax,
+                job.salaryCurrency,
+              )}
+            </DetailRow>
             <DetailRow label="Applied date">
               {formatDateValue(job.appliedAt)}
+            </DetailRow>
+            <DetailRow label="Next action date">
+              {formatDateValue(job.nextActionDate)}
             </DetailRow>
             <DetailRow label="Posting URL">
               {job.url ? (

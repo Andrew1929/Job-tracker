@@ -1,15 +1,21 @@
-import type { TrendDirection } from "@/types/dashboard.types";
-import type { JobStatus } from "@/types/job-status.types";
+import type { JobStatus } from "@/types/jobs.types";
 
-export type AnalyticsMetric = {
-  id: string;
-  title: string;
-  value: string;
-  trend: string;
+export type TrendDirection = "up" | "down";
+
+export type MetricSummary = {
+  value: number;
+  changePercent: number;
   trendDirection: TrendDirection;
 };
 
-export type AnalyticsChartPoint = {
+export type AnalyticsSummary = {
+  applications: MetricSummary;
+  interviews: MetricSummary;
+  offers: MetricSummary;
+  acceptanceRate: MetricSummary;
+};
+
+export type AnalyticsTimeSeriesPoint = {
   label: string;
   applications: number;
   interviews: number;
@@ -17,14 +23,17 @@ export type AnalyticsChartPoint = {
 
 export type StatusDistributionSegment = {
   status: JobStatus;
+  count: number;
   percentage: number;
-  color: string;
-  legendClassName: string;
+};
+
+export type StatusDistribution = {
+  total: number;
+  segments: StatusDistributionSegment[];
 };
 
 export type ConversionFunnelStage = {
-  id: string;
-  label: string;
+  stage: JobStatus;
   count: number;
   percentage: number;
 };
@@ -32,4 +41,23 @@ export type ConversionFunnelStage = {
 export type AnalyticsInsight = {
   id: string;
   text: string;
+};
+
+export type AnalyticsOverview = {
+  rangeStart: string;
+  rangeEnd: string;
+  summary: AnalyticsSummary;
+  applicationsOverTime: AnalyticsTimeSeriesPoint[];
+  statusDistribution: StatusDistribution;
+  conversionFunnel: ConversionFunnelStage[];
+  insights: AnalyticsInsight[];
+};
+
+// View-model consumed by the metric cards.
+export type AnalyticsMetric = {
+  id: string;
+  title: string;
+  value: string;
+  trend: string;
+  trendDirection: TrendDirection;
 };

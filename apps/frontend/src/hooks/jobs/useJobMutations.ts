@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { jobKeys } from "@/lib/query/query-keys";
+import { jobKeys, analyticsKeys } from "@/lib/query/query-keys";
 import { createJob, deleteJob, updateJob } from "@/services/jobs.service";
 import type {
   CreateJobInput,
@@ -18,6 +18,7 @@ export function useCreateJob() {
     onSuccess: (job) => {
       queryClient.setQueryData(jobKeys.detail(job.id), job);
       void queryClient.invalidateQueries({ queryKey: jobKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: analyticsKeys.all });
     },
   });
 }
@@ -31,6 +32,7 @@ export function useUpdateJob() {
     onSuccess: (job) => {
       queryClient.setQueryData(jobKeys.detail(job.id), job);
       void queryClient.invalidateQueries({ queryKey: jobKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: analyticsKeys.all });
     },
   });
 }
@@ -73,6 +75,7 @@ export function useDeleteJob() {
     onSettled: (_data, _error, id) => {
       queryClient.removeQueries({ queryKey: jobKeys.detail(id) });
       void queryClient.invalidateQueries({ queryKey: jobKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: analyticsKeys.all });
     },
   });
 }

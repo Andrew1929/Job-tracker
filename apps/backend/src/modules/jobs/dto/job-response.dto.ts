@@ -1,5 +1,11 @@
 import { Exclude, Expose, plainToInstance, Type } from 'class-transformer';
-import { JobStatus } from '../../../../generated/prisma/client';
+import {
+  EmploymentType,
+  JobPriority,
+  JobSource,
+  JobStatus,
+  RemoteType,
+} from '../../../../generated/prisma/client';
 import { JobDetail, JobListItem } from '../types/job.types';
 
 @Exclude()
@@ -32,7 +38,34 @@ export class JobResponseDto {
   status!: JobStatus;
 
   @Expose()
+  priority!: JobPriority;
+
+  @Expose()
+  source!: JobSource | null;
+
+  @Expose()
+  location!: string | null;
+
+  @Expose()
+  remoteType!: RemoteType | null;
+
+  @Expose()
+  employmentType!: EmploymentType | null;
+
+  @Expose()
+  salaryMin!: number | null;
+
+  @Expose()
+  salaryMax!: number | null;
+
+  @Expose()
+  salaryCurrency!: string | null;
+
+  @Expose()
   appliedAt!: Date | null;
+
+  @Expose()
+  nextActionDate!: Date | null;
 
   @Expose()
   url!: string | null;

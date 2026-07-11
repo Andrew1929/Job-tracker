@@ -1,6 +1,6 @@
 import { Exclude, Expose, plainToInstance, Type } from 'class-transformer';
 import { JobStatus } from '../../../../generated/prisma/client';
-import { AnalyticsOverview, TrendDirection } from '../types/analytics.types';
+import type { AnalyticsOverview, TrendDirection } from '../types/analytics.types';
 
 @Exclude()
 export class MetricSummaryDto {

@@ -7,3 +7,8 @@ export const jobKeys = {
   details: () => [...jobKeys.all, "detail"] as const,
   detail: (id: string) => [...jobKeys.details(), id] as const,
 };
+
+export const analyticsKeys = {
+  all: ["analytics"] as const,
+  overview: () => [...analyticsKeys.all, "overview"] as const,
+};
