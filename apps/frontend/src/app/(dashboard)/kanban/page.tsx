@@ -1,11 +1,5 @@
-import { KanbanBoard } from "@/components/kanban/KanbanBoard";
-import { KanbanHeader } from "@/components/kanban/KanbanHeader";
+import { KanbanContent } from "@/components/kanban/KanbanContent";
 
 export default function KanbanPage() {
-  return (
-    <div className="space-y-6">
-      <KanbanHeader />
-      <KanbanBoard />
-    </div>
-  );
+  return <KanbanContent />;
 }

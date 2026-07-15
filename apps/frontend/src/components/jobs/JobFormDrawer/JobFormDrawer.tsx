@@ -6,12 +6,18 @@ import { JobForm } from "@/components/jobs/JobForm";
 import { Drawer } from "@/components/shared/Drawer";
 import { useCreateJob, useUpdateJob } from "@/hooks/jobs";
 import { getApiErrorMessage } from "@/lib/api/error-message";
-import { toJobInput, type JobFormValues } from "@/lib/validations/job.schema";
-import type { Job, JobFormMode } from "@/types/jobs.types";
+import {
+  EMPTY_JOB_FORM_VALUES,
+  toJobInput,
+  type JobFormValues,
+} from "@/lib/validations/job.schema";
+import type { Job, JobFormMode, JobStatus } from "@/types/jobs.types";
 
 type JobFormDrawerProps = {
   mode: JobFormMode;
   job?: Job;
+  /** Pre-selects the status when creating a job (e.g. from a Kanban column). */
+  initialStatus?: JobStatus;
   onClose: () => void;
   onSuccess?: (job: Job) => void;
 };
@@ -39,6 +45,7 @@ function jobToFormValues(job: Job): JobFormValues {
 export function JobFormDrawer({
   mode,
   job,
+  initialStatus,
   onClose,
   onSuccess,
 }: JobFormDrawerProps) {
@@ -48,6 +55,13 @@ export function JobFormDrawer({
 
   const isEdit = mode === "edit";
   const isSubmitting = createJob.isPending || updateJob.isPending;
+
+  const defaultValues =
+    isEdit && job
+      ? jobToFormValues(job)
+      : initialStatus
+        ? { ...EMPTY_JOB_FORM_VALUES, status: initialStatus }
+        : undefined;
 
   const handleSubmit = async (values: JobFormValues) => {
     setErrorMessage(null);
@@ -69,7 +83,7 @@ export function JobFormDrawer({
   return (
     <Drawer title={isEdit ? "Edit Job" : "Add New Job"} onClose={onClose}>
       <JobForm
-        defaultValues={isEdit && job ? jobToFormValues(job) : undefined}
+        defaultValues={defaultValues}
         submitLabel={isEdit ? "Save changes" : "Create job"}
         isSubmitting={isSubmitting}
         errorMessage={errorMessage}

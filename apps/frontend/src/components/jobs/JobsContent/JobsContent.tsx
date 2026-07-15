@@ -8,106 +8,37 @@ import { JobsHeader } from "@/components/jobs/JobsHeader";
 import { JobsList } from "@/components/jobs/JobsList";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Card, CardContent } from "@/components/ui/card";
+import { DEFAULT_JOBS_PAGE_SIZE } from "@/constants/jobs.constants";
 import {
-  ALL_FILTER_VALUE,
-  DEFAULT_JOBS_PAGE_SIZE,
-} from "@/constants/jobs.constants";
-import { useDeleteJob, useJobsQuery } from "@/hooks/jobs";
-import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+  buildCompanyOptions,
+  useDeleteJob,
+  useJobFilters,
+  useJobsQuery,
+} from "@/hooks/jobs";
 import { getApiErrorMessage } from "@/lib/api/error-message";
 
-import type { SelectOption } from "@/types/select-option.types";
-import type {
-  Job,
-  JobsQueryParams,
-  JobSortField,
-  JobStatus,
-  SortOrder,
-} from "@/types/jobs.types";
-
-const DEFAULT_SORT_VALUE = "createdAt:desc";
+import type { Job, JobsQueryParams } from "@/types/jobs.types";
 
 type JobFormState =
   | { mode: "create" }
   | { mode: "edit"; job: Job }
   | null;
 
-function parseSortValue(value: string): {
-  sortBy: JobSortField;
-  sortOrder: SortOrder;
-} {
-  const [sortBy, sortOrder] = value.split(":");
-  return {
-    sortBy: sortBy as JobSortField,
-    sortOrder: sortOrder as SortOrder,
-  };
-}
-
-function buildCompanyOptions(jobs: Job[]): SelectOption[] {
-  const uniqueCompanies = new Map<string, string>();
-  for (const job of jobs) {
-    if (job.company) {
-      uniqueCompanies.set(job.company.id, job.company.name);
-    }
-  }
-
-  return [
-    { value: ALL_FILTER_VALUE, label: "All companies" },
-    ...Array.from(uniqueCompanies, ([value, label]) => ({ value, label })),
-  ];
-}
-
 export function JobsContent() {
-  const [searchInput, setSearchInput] = useState("");
-  const [statusFilter, setStatusFilter] = useState(ALL_FILTER_VALUE);
-  const [companyFilter, setCompanyFilter] = useState(ALL_FILTER_VALUE);
-  const [sortValue, setSortValue] = useState(DEFAULT_SORT_VALUE);
   const [page, setPage] = useState(1);
 
   const [formState, setFormState] = useState<JobFormState>(null);
   const [deleteTarget, setDeleteTarget] = useState<Job | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const debouncedSearch = useDebouncedValue(searchInput);
-
   // Any filter change returns the user to the first page. Resetting inside the
-  // handlers (instead of an effect) avoids a cascading extra render.
-  const handleSearchChange = (value: string) => {
-    setSearchInput(value);
-    setPage(1);
-  };
+  // change handler (instead of an effect) avoids a cascading extra render.
+  const filters = useJobFilters({ onChange: () => setPage(1) });
 
-  const handleStatusFilterChange = (value: string) => {
-    setStatusFilter(value);
-    setPage(1);
-  };
-
-  const handleCompanyFilterChange = (value: string) => {
-    setCompanyFilter(value);
-    setPage(1);
-  };
-
-  const handleSortChange = (value: string) => {
-    setSortValue(value);
-    setPage(1);
-  };
-
-  const queryParams = useMemo<JobsQueryParams>(() => {
-    const { sortBy, sortOrder } = parseSortValue(sortValue);
-
-    return {
-      page,
-      limit: DEFAULT_JOBS_PAGE_SIZE,
-      search: debouncedSearch.trim() || undefined,
-      status:
-        statusFilter === ALL_FILTER_VALUE
-          ? undefined
-          : (statusFilter as JobStatus),
-      companyId: companyFilter === ALL_FILTER_VALUE ? undefined : companyFilter,
-      sortBy,
-      sortOrder,
-    };
-  }, [page, debouncedSearch, statusFilter, companyFilter, sortValue]);
+  const queryParams = useMemo<JobsQueryParams>(
+    () => ({ page, limit: DEFAULT_JOBS_PAGE_SIZE, ...filters.params }),
+    [page, filters.params],
+  );
 
   const jobsQuery = useJobsQuery(queryParams);
   const deleteJob = useDeleteJob();
@@ -115,11 +46,6 @@ export function JobsContent() {
   const jobs = useMemo(() => jobsQuery.data?.items ?? [], [jobsQuery.data]);
   const meta = jobsQuery.data?.meta;
   const companyOptions = useMemo(() => buildCompanyOptions(jobs), [jobs]);
-
-  const hasActiveFilters =
-    debouncedSearch.trim().length > 0 ||
-    statusFilter !== ALL_FILTER_VALUE ||
-    companyFilter !== ALL_FILTER_VALUE;
 
   const handleConfirmDelete = async () => {
     if (!deleteTarget) {
@@ -148,15 +74,15 @@ export function JobsContent() {
       <Card className="rounded-xl shadow-sm">
         <CardContent className="space-y-6 p-6">
           <JobsFilters
-            searchQuery={searchInput}
-            onSearchChange={handleSearchChange}
-            statusFilter={statusFilter}
-            onStatusFilterChange={handleStatusFilterChange}
-            companyFilter={companyFilter}
-            onCompanyFilterChange={handleCompanyFilterChange}
+            searchQuery={filters.searchInput}
+            onSearchChange={filters.handleSearchChange}
+            statusFilter={filters.statusFilter}
+            onStatusFilterChange={filters.handleStatusFilterChange}
+            companyFilter={filters.companyFilter}
+            onCompanyFilterChange={filters.handleCompanyFilterChange}
             companyOptions={companyOptions}
-            sortValue={sortValue}
-            onSortChange={handleSortChange}
+            sortValue={filters.sortValue}
+            onSortChange={filters.handleSortChange}
           />
 
           <JobsList
@@ -165,7 +91,7 @@ export function JobsContent() {
             isError={jobsQuery.isError}
             errorMessage={getApiErrorMessage(jobsQuery.error)}
             isFetching={jobsQuery.isFetching}
-            hasActiveFilters={hasActiveFilters}
+            hasActiveFilters={filters.hasActiveFilters}
             page={page}
             totalPages={meta?.totalPages ?? 0}
             onPageChange={setPage}

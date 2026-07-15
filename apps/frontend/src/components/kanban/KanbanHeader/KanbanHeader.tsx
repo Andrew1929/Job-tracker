@@ -1,22 +1,22 @@
 import { Plus } from "lucide-react";
 
-import { KanbanJobFilter } from "@/components/kanban/KanbanJobFilter";
 import { Button } from "@/components/ui/button";
 
-export function KanbanHeader() {
+type KanbanHeaderProps = {
+  onAddJob: () => void;
+};
+
+export function KanbanHeader({ onAddJob }: KanbanHeaderProps) {
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <h1 className="text-2xl font-bold tracking-tight text-foreground">
         Kanban Board
       </h1>
 
-      <div className="flex items-center gap-3">
-        <Button type="button" size="sm">
-          <Plus />
-          Add Job
-        </Button>
-        <KanbanJobFilter />
-      </div>
+      <Button type="button" size="sm" onClick={onAddJob}>
+        <Plus />
+        Add Job
+      </Button>
     </div>
   );
 }
