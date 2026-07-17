@@ -1,5 +1,5 @@
+import { JobStatusBadge } from "@/components/jobs/JobStatusBadge";
 import { CompanyAvatar } from "@/components/shared/CompanyAvatar";
-import { StatusBadge } from "@/components/shared/StatusBadge";
 
 import type { RecentApplication } from "@/types/dashboard.types";
 
@@ -26,7 +26,7 @@ export function ApplicationRow({ application }: ApplicationRowProps) {
         {application.role}
       </td>
       <td className="py-4 pr-4">
-        <StatusBadge status={application.status} />
+        <JobStatusBadge status={application.status} />
       </td>
       <td className="hidden py-4 text-sm text-muted-foreground md:table-cell">
         {application.date}

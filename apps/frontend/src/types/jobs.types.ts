@@ -1,9 +1,6 @@
 /**
  * Backend-aligned Jobs domain (mirrors the API `JobResponseDto`).
- *
- * Note: the shared mock status enum in `job-status.types.ts` still powers the
- * not-yet-migrated Dashboard/Analytics/Kanban views, so it is intentionally
- * left untouched. This file is the source of truth for the Jobs feature.
+ * This file is the source of truth for job status across the app.
  */
 
 export const JOB_STATUSES = [

@@ -108,18 +108,23 @@ export function mapConversionFunnel(
   }));
 }
 
-export function computeChartMax(points: AnalyticsTimeSeriesPoint[]): number {
-  const peak = Math.max(
-    0,
-    ...points.flatMap((point) => [point.applications, point.interviews]),
-  );
-
-  if (peak === 0) {
+// Rounds a peak value up to a "nice" axis maximum (e.g. 34 -> 40, 0 -> 10).
+export function niceAxisMax(peak: number): number {
+  if (peak <= 0) {
     return 10;
   }
 
   const magnitude = 10 ** Math.floor(Math.log10(peak));
   return Math.ceil(peak / magnitude) * magnitude;
+}
+
+export function computeChartMax(points: AnalyticsTimeSeriesPoint[]): number {
+  return niceAxisMax(
+    Math.max(
+      0,
+      ...points.flatMap((point) => [point.applications, point.interviews]),
+    ),
+  );
 }
 
 export function buildYAxisTicks(maxValue: number): number[] {

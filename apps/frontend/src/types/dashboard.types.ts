@@ -1,15 +1,18 @@
-import type { JobStatus } from "@/types/job-status.types";
+import type { TrendDirection } from "@/types/analytics.types";
+import type { JobStatus } from "@/types/jobs.types";
 
-export type TrendDirection = "up" | "down";
+export type DashboardStatId =
+  | "applications"
+  | "interviews"
+  | "offers"
+  | "acceptance-rate";
 
-export type StatCardData = {
-  id: string;
+export type DashboardStat = {
+  id: DashboardStatId;
   title: string;
-  value: number;
+  value: string;
   trend: string;
   trendDirection: TrendDirection;
-  iconBgClass: string;
-  iconClass: string;
 };
 
 export type ChartDataPoint = {
@@ -26,22 +29,12 @@ export type UpcomingInterview = {
   dateTime: string;
 };
 
-export type ApplicationStatus = Extract<
-  JobStatus,
-  "Interview" | "Applied" | "Offer"
->;
-
 export type RecentApplication = {
   id: string;
   company: string;
   companyInitial: string;
   companyColor: string;
   role: string;
-  status: ApplicationStatus;
+  status: JobStatus;
   date: string;
-};
-
-export type WeeklyGoalData = {
-  current: number;
-  target: number;
 };

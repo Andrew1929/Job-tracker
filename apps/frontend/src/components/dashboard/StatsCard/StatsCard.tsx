@@ -3,14 +3,21 @@ import type { LucideIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-import type { StatCardData } from "@/types/dashboard.types";
+import type { DashboardStat } from "@/types/dashboard.types";
 
 type StatsCardProps = {
-  data: StatCardData;
+  data: DashboardStat;
   icon: LucideIcon;
+  iconBgClass: string;
+  iconClass: string;
 };
 
-export function StatsCard({ data, icon: Icon }: StatsCardProps) {
+export function StatsCard({
+  data,
+  icon: Icon,
+  iconBgClass,
+  iconClass,
+}: StatsCardProps) {
   const isPositive = data.trendDirection === "up";
 
   return (
@@ -36,10 +43,10 @@ export function StatsCard({ data, icon: Icon }: StatsCardProps) {
           <div
             className={cn(
               "flex size-11 items-center justify-center rounded-full",
-              data.iconBgClass,
+              iconBgClass,
             )}
           >
-            <Icon className={cn("size-5", data.iconClass)} aria-hidden="true" />
+            <Icon className={cn("size-5", iconClass)} aria-hidden="true" />
           </div>
         </div>
       </CardContent>
