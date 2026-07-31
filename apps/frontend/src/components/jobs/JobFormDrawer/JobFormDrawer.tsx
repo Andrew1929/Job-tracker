@@ -6,6 +6,7 @@ import { JobForm } from "@/components/jobs/JobForm";
 import { Drawer } from "@/components/shared/Drawer";
 import { useCreateJob, useUpdateJob } from "@/hooks/jobs";
 import { getApiErrorMessage } from "@/lib/api/error-message";
+import { toDateOnlyKey } from "@/lib/date/date-only";
 import {
   EMPTY_JOB_FORM_VALUES,
   toJobInput,
@@ -36,8 +37,8 @@ function jobToFormValues(job: Job): JobFormValues {
     salaryMax: job.salaryMax != null ? String(job.salaryMax) : "",
     salaryCurrency: job.salaryCurrency ?? "",
     url: job.url ?? "",
-    appliedAt: job.appliedAt ? job.appliedAt.slice(0, 10) : "",
-    nextActionDate: job.nextActionDate ? job.nextActionDate.slice(0, 10) : "",
+    appliedAt: toDateOnlyKey(job.appliedAt) ?? "",
+    nextActionDate: toDateOnlyKey(job.nextActionDate) ?? "",
     description: job.description ?? "",
   };
 }

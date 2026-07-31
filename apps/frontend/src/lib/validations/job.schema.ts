@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { dateOnlyKeyToIso, isDateOnlyKey } from "@/lib/date/date-only";
 import {
   EMPLOYMENT_TYPES,
   JOB_PRIORITIES,
@@ -28,9 +29,10 @@ function isValidHttpUrl(value: string): boolean {
 const optionalEnum = <T extends readonly [string, ...string[]]>(values: T) =>
   z.union([z.enum(values), z.literal("")]);
 
+// `<input type="date">` always submits `YYYY-MM-DD`, or "" when cleared.
 const optionalDateString = z
   .string()
-  .refine((value) => value === "" || !Number.isNaN(Date.parse(value)), {
+  .refine((value) => value === "" || isDateOnlyKey(value), {
     message: "Enter a valid date",
   });
 
@@ -132,7 +134,7 @@ function emptyToUndefined(value: string): string | undefined {
 }
 
 function toIsoDate(value: string): string | undefined {
-  return value ? new Date(value).toISOString() : undefined;
+  return value ? dateOnlyKeyToIso(value) : undefined;
 }
 
 function toWholeNumber(value: string): number | undefined {

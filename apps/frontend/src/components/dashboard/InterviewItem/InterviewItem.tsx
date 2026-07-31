@@ -19,7 +19,7 @@ export function InterviewItem({ interview }: InterviewItemProps) {
           {interview.role}
         </p>
         <p className="truncate text-xs text-muted-foreground">
-          {interview.dateTime}
+          {interview.date}
         </p>
       </div>
     </li>

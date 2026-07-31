@@ -4,7 +4,7 @@ import { JobPriorityBadge } from "@/components/jobs/JobPriorityBadge";
 import { JobStatusBadge } from "@/components/jobs/JobStatusBadge";
 import { ActionMenu } from "@/components/shared/ActionMenu";
 import { JOBS_ROUTES } from "@/constants/jobs.constants";
-import { formatDateValue } from "@/lib/format/date";
+import { formatDateOnly } from "@/lib/date/date-only";
 
 import type { Job } from "@/types/jobs.types";
 
@@ -30,7 +30,7 @@ export function JobTableRow({ job, onEdit, onDelete }: JobTableRowProps) {
         <JobPriorityBadge priority={job.priority} />
       </td>
       <td className="hidden py-4 pr-4 text-sm text-muted-foreground sm:table-cell">
-        {formatDateValue(job.appliedAt)}
+        {formatDateOnly(job.appliedAt)}
       </td>
       <td className="py-4 text-right">
         <ActionMenu

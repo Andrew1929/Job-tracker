@@ -1,3 +1,9 @@
+import {
+  formatDateOnly,
+  formatDateOnlyShort,
+  toDateOnlyKey,
+  toLocalDateOnlyKey,
+} from "@/lib/date/date-only";
 import { formatDateValue } from "@/lib/format/date";
 import type {
   AnalyticsSummary,
@@ -134,30 +140,30 @@ export function mapRecentApplications(
       ...resolveCompanyAvatar(job),
       role: job.title,
       status: job.status,
-      date: formatDateValue(job.appliedAt ?? job.createdAt),
+      // `appliedAt` is a calendar date, `createdAt` a real timestamp.
+      date: job.appliedAt
+        ? formatDateOnly(job.appliedAt)
+        : formatDateValue(job.createdAt),
     }));
 }
 
-type ScheduledInterviewJob = Job & { nextActionDate: string };
+type ScheduledInterview = {
+  job: Job;
+  dateKey: string;
+};
 
-function isUpcomingInterview(
-  job: Job,
-  now: number,
-): job is ScheduledInterviewJob {
-  return (
-    job.status === "INTERVIEWING" &&
-    job.nextActionDate !== null &&
-    new Date(job.nextActionDate).getTime() >= now
-  );
-}
+/**
+ * `nextActionDate` is a calendar date, so "upcoming" is a date comparison
+ * against the user's today, not an instant comparison. Comparing instants would
+ * drop an action scheduled for today as soon as local time passed UTC midnight.
+ */
+function toScheduledInterview(job: Job, todayKey: string): ScheduledInterview[] {
+  if (job.status !== "INTERVIEWING") {
+    return [];
+  }
 
-function formatInterviewDateTime(value: string, locale = "en-US"): string {
-  return new Intl.DateTimeFormat(locale, {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(value));
+  const dateKey = toDateOnlyKey(job.nextActionDate);
+  return dateKey && dateKey >= todayKey ? [{ job, dateKey }] : [];
 }
 
 export function mapUpcomingInterviews(
@@ -165,22 +171,16 @@ export function mapUpcomingInterviews(
   now: Date,
   limit: number,
 ): UpcomingInterview[] {
-  const nowTime = now.getTime();
+  const todayKey = toLocalDateOnlyKey(now);
 
   return jobs
-    .filter((job): job is ScheduledInterviewJob =>
-      isUpcomingInterview(job, nowTime),
-    )
-    .sort(
-      (a, b) =>
-        new Date(a.nextActionDate).getTime() -
-        new Date(b.nextActionDate).getTime(),
-    )
+    .flatMap((job) => toScheduledInterview(job, todayKey))
+    .sort((a, b) => a.dateKey.localeCompare(b.dateKey))
     .slice(0, limit)
-    .map((job) => ({
+    .map(({ job, dateKey }) => ({
       id: job.id,
       ...resolveCompanyAvatar(job),
       role: job.title,
-      dateTime: formatInterviewDateTime(job.nextActionDate),
+      date: formatDateOnlyShort(dateKey),
     }));
 }

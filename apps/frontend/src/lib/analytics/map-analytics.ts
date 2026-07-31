@@ -127,7 +127,24 @@ export function computeChartMax(points: AnalyticsTimeSeriesPoint[]): number {
   );
 }
 
+const Y_AXIS_MAX_SEGMENTS = 4;
+
+/**
+ * Gridline values for the Y axis, always strictly increasing.
+ *
+ * A fixed five-tick axis collapsed to duplicates on small maxima (a max of 1
+ * produced 0, 0, 1, 1, 1), which rendered overlapping labels and duplicate
+ * React keys. Capping the segment count at `maxValue` keeps the step at 1 or
+ * more, which guarantees every rounded tick is distinct.
+ */
 export function buildYAxisTicks(maxValue: number): number[] {
-  const step = maxValue / 4;
-  return Array.from({ length: 5 }, (_, index) => Math.round(index * step));
+  const segments = Math.max(
+    1,
+    Math.min(Y_AXIS_MAX_SEGMENTS, Math.floor(maxValue)),
+  );
+  const step = maxValue / segments;
+
+  return Array.from({ length: segments + 1 }, (_, index) =>
+    Math.round(index * step),
+  );
 }

@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  IsDate,
   IsEnum,
   IsInt,
   IsOptional,
@@ -20,6 +21,7 @@ export enum JobSortField {
   CREATED_AT = 'createdAt',
   UPDATED_AT = 'updatedAt',
   APPLIED_AT = 'appliedAt',
+  NEXT_ACTION_DATE = 'nextActionDate',
   TITLE = 'title',
   STATUS = 'status',
 }
@@ -55,6 +57,19 @@ export class QueryJobsDto {
   @IsOptional()
   @IsUUID()
   companyId?: string;
+
+  // Inclusive lower bound for `nextActionDate`. Scheduled-action consumers such
+  // as the calendar request only the range they render.
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  nextActionFrom?: Date;
+
+  // Inclusive upper bound for `nextActionDate`.
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  nextActionTo?: Date;
 
   @IsOptional()
   @IsEnum(JobSortField)

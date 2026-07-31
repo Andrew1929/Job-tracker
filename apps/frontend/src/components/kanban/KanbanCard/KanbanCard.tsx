@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { JobPriorityBadge } from "@/components/jobs/JobPriorityBadge";
 import { JOBS_ROUTES } from "@/constants/jobs.constants";
+import { formatDateOnly } from "@/lib/date/date-only";
 import { formatDateValue } from "@/lib/format/date";
 import { cn } from "@/lib/utils";
 
@@ -41,7 +42,9 @@ export function KanbanCard({ job }: KanbanCardProps) {
       <p className="mt-1 text-sm text-foreground">{job.title}</p>
       <div className="mt-3 flex items-center justify-between gap-2">
         <span className="text-xs text-muted-foreground">
-          {formatDateValue(job.appliedAt ?? job.createdAt)}
+          {job.appliedAt
+            ? formatDateOnly(job.appliedAt)
+            : formatDateValue(job.createdAt)}
         </span>
         <JobPriorityBadge priority={job.priority} />
       </div>

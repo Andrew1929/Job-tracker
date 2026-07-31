@@ -26,7 +26,7 @@ export type UpcomingInterview = {
   companyInitial: string;
   companyColor: string;
   role: string;
-  dateTime: string;
+  date: string;
 };
 
 export type RecentApplication = {

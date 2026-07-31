@@ -201,6 +201,7 @@ model Job {
   @@index([companyId])
   @@index([userId, status])
   @@index([nextActionDate])
+  @@index([userId, nextActionDate])
 }
 
 model Interview {

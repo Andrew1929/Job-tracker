@@ -92,6 +92,7 @@ export const JOB_SORT_FIELDS = [
   "createdAt",
   "updatedAt",
   "appliedAt",
+  "nextActionDate",
   "title",
   "status",
 ] as const;
@@ -106,6 +107,9 @@ export type JobsQueryParams = {
   search?: string;
   status?: JobStatus;
   companyId?: string;
+  /** Inclusive ISO bounds on `nextActionDate`, used by scheduled-action views. */
+  nextActionFrom?: string;
+  nextActionTo?: string;
   sortBy: JobSortField;
   sortOrder: SortOrder;
 };

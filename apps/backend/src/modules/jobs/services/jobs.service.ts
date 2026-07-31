@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   JobActivityType,
   JobStatus,
@@ -59,6 +63,8 @@ export class JobsService {
   }
 
   async findMany(userId: string, query: QueryJobsDto): Promise<PaginatedJobs> {
+    this.assertValidNextActionRange(query);
+
     const where = this.buildWhere(userId, query);
     const skip = (query.page - 1) * query.limit;
 
@@ -159,16 +165,34 @@ export class JobsService {
     await this.analyticsService.invalidateCache(userId);
   }
 
+  private assertValidNextActionRange(query: QueryJobsDto): void {
+    const { nextActionFrom, nextActionTo } = query;
+
+    if (nextActionFrom && nextActionTo && nextActionFrom > nextActionTo) {
+      throw new BadRequestException(
+        'nextActionFrom must be earlier than or equal to nextActionTo',
+      );
+    }
+  }
+
   private buildWhere(
     userId: string,
     query: QueryJobsDto,
   ): Prisma.JobWhereInput {
-    const { status, companyId, search } = query;
+    const { status, companyId, search, nextActionFrom, nextActionTo } = query;
 
     return {
       userId,
       ...(status && { status }),
       ...(companyId && { companyId }),
+      // A bounded range also excludes jobs without a scheduled next action,
+      // because Prisma comparison filters never match NULL.
+      ...((nextActionFrom || nextActionTo) && {
+        nextActionDate: {
+          ...(nextActionFrom && { gte: nextActionFrom }),
+          ...(nextActionTo && { lte: nextActionTo }),
+        },
+      }),
       ...(search && {
         OR: [
           { title: { contains: search, mode: 'insensitive' } },

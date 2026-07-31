@@ -19,6 +19,8 @@ export function getJobs(
       search: params.search,
       status: params.status,
       companyId: params.companyId,
+      nextActionFrom: params.nextActionFrom,
+      nextActionTo: params.nextActionTo,
       sortBy: params.sortBy,
       sortOrder: params.sortOrder,
     },
