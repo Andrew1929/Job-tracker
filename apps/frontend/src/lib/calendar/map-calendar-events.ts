@@ -1,4 +1,4 @@
-import { toDateOnlyKey } from "@/lib/date/date-only";
+import { toLocalDateKey } from "@/lib/date/date-time";
 
 import type { CalendarEvent } from "@/types/calendar.types";
 import type { Job } from "@/types/jobs.types";
@@ -17,7 +17,9 @@ function compareEvents(a: CalendarEvent, b: CalendarEvent): number {
 }
 
 function toCalendarEvent(job: Job): CalendarEvent[] {
-  const dateKey = toDateOnlyKey(job.nextActionDate);
+  // The grid is built from local wall-clock days, so a scheduled action lands on
+  // the day the user sees it, not on its UTC day.
+  const dateKey = toLocalDateKey(job.nextActionDate);
   if (!dateKey) {
     return [];
   }

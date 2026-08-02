@@ -1,12 +1,12 @@
-export function formatFullDate(date: Date, locale = "en-US"): string {
+import { EMPTY_DATE_PLACEHOLDER } from "@/lib/date/date-only";
+
+function formatFullDate(date: Date, locale = "en-US"): string {
   return new Intl.DateTimeFormat(locale, {
     month: "long",
     day: "numeric",
     year: "numeric",
   }).format(date);
 }
-
-const EMPTY_DATE_PLACEHOLDER = "—";
 
 export function formatDateValue(
   value: string | Date | null | undefined,

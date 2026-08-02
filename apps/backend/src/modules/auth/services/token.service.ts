@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'crypto';
-import { AUTH_REFRESH_TOKEN_TTL_SECONDS } from '../../../common/constants/redis-keys.constants';
+import {
+  AUTH_REFRESH_TOKEN_TTL_SECONDS,
+  REDIS_KEY_PREFIX,
+} from '../../../common/constants/redis-keys.constants';
+import { parseDurationToMs } from '../../../common/utils/duration.util';
 import { AUTH_CONFIG_KEY, AuthConfig } from '../../../config/auth.config';
 import { RedisService } from '../../redis/redis.service';
 import {
@@ -80,8 +84,12 @@ export class TokenService {
     return AUTH_REFRESH_TOKEN_TTL_SECONDS;
   }
 
+  /**
+   * Derived from the same value that signs the token, so the cookie can never
+   * outlive the JWT it carries when `JWT_ACCESS_EXPIRES_IN` changes.
+   */
   getAccessTokenMaxAgeMs(): number {
-    return 15 * 60 * 1000;
+    return parseDurationToMs(this.authConfig.accessExpiresIn);
   }
 
   getRefreshTokenMaxAgeMs(): number {
@@ -125,7 +133,11 @@ export class RefreshTokenService {
   }
 
   async revokeAllUserSessions(userId: string): Promise<number> {
-    const pattern = this.redisService.buildKey('auth:refresh', userId, '*');
+    const pattern = this.redisService.buildKey(
+      REDIS_KEY_PREFIX.AUTH_REFRESH,
+      userId,
+      '*',
+    );
     return this.redisService.delByPattern(pattern);
   }
 }

@@ -276,10 +276,10 @@ export function JobForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="job-next-action-at">Next action date</Label>
+          <Label htmlFor="job-next-action-at">Next action date and time</Label>
           <Input
             id="job-next-action-at"
-            type="date"
+            type="datetime-local"
             aria-invalid={Boolean(errors.nextActionDate)}
             aria-describedby={
               errors.nextActionDate ? "job-next-action-at-error" : undefined

@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { CALENDAR_UPCOMING_EVENTS_LIMIT } from "@/constants/calendar.constants";
-import { dateOnlyKeyToIso } from "@/lib/date/date-only";
+import { localDayStartToIso } from "@/lib/date/date-time";
 import { jobKeys } from "@/lib/query/query-keys";
 import { getJobs } from "@/services/jobs.service";
 
@@ -18,7 +18,7 @@ export function useUpcomingEventsQuery(fromDateKey: string) {
   const params: JobsQueryParams = {
     page: 1,
     limit: CALENDAR_UPCOMING_EVENTS_LIMIT,
-    nextActionFrom: dateOnlyKeyToIso(fromDateKey),
+    nextActionFrom: localDayStartToIso(fromDateKey),
     sortBy: "nextActionDate",
     sortOrder: "asc",
   };

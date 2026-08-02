@@ -2,12 +2,17 @@ import { z } from "zod";
 
 import { dateOnlyKeyToIso, isDateOnlyKey } from "@/lib/date/date-only";
 import {
+  dateTimeLocalKeyToIso,
+  isDateTimeLocalKey,
+} from "@/lib/date/date-time";
+import {
   EMPLOYMENT_TYPES,
   JOB_PRIORITIES,
   JOB_SOURCES,
   JOB_STATUSES,
   REMOTE_TYPES,
   type CreateJobInput,
+  type UpdateJobInput,
 } from "@/types/jobs.types";
 
 const TITLE_MAX_LENGTH = 200;
@@ -34,6 +39,13 @@ const optionalDateString = z
   .string()
   .refine((value) => value === "" || isDateOnlyKey(value), {
     message: "Enter a valid date",
+  });
+
+// `<input type="datetime-local">` submits `YYYY-MM-DDTHH:mm`, or "" when cleared.
+const optionalDateTimeString = z
+  .string()
+  .refine((value) => value === "" || isDateTimeLocalKey(value), {
+    message: "Enter a valid date and time",
   });
 
 const optionalWholeNumber = z
@@ -88,7 +100,7 @@ export const jobFormSchema = z
         message: "Enter a valid URL starting with http:// or https://",
       }),
     appliedAt: optionalDateString,
-    nextActionDate: optionalDateString,
+    nextActionDate: optionalDateTimeString,
     description: z
       .string()
       .trim()
@@ -137,6 +149,10 @@ function toIsoDate(value: string): string | undefined {
   return value ? dateOnlyKeyToIso(value) : undefined;
 }
 
+function toIsoDateTime(value: string): string | undefined {
+  return value ? dateTimeLocalKeyToIso(value) : undefined;
+}
+
 function toWholeNumber(value: string): number | undefined {
   return value ? Number(value) : undefined;
 }
@@ -157,6 +173,18 @@ export function toJobInput(values: JobFormValues): CreateJobInput {
     url: emptyToUndefined(values.url),
     description: emptyToUndefined(values.description),
     appliedAt: toIsoDate(values.appliedAt),
-    nextActionDate: toIsoDate(values.nextActionDate),
+    nextActionDate: toIsoDateTime(values.nextActionDate),
+  };
+}
+
+/**
+ * Edit payload. A cleared next action is sent as an explicit null, because the
+ * API reads `undefined` as "leave unchanged" and would keep both the stored date
+ * and its scheduled reminder.
+ */
+export function toJobUpdateInput(values: JobFormValues): UpdateJobInput {
+  return {
+    ...toJobInput(values),
+    nextActionDate: toIsoDateTime(values.nextActionDate) ?? null,
   };
 }

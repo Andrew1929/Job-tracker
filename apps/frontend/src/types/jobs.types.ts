@@ -132,6 +132,9 @@ export type CreateJobInput = {
   companyName?: string;
 };
 
-export type UpdateJobInput = Partial<CreateJobInput>;
+export type UpdateJobInput = Partial<Omit<CreateJobInput, "nextActionDate">> & {
+  /** Explicit null clears the scheduled next action and cancels its reminder. */
+  nextActionDate?: string | null;
+};
 
 export type JobFormMode = "create" | "edit";

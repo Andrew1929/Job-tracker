@@ -4,7 +4,7 @@ import { KanbanColumn } from "@/components/kanban/KanbanColumn";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Skeleton } from "@/components/shared/Skeleton";
 import { KANBAN_COLUMNS } from "@/constants/kanban.constants";
-import { useHorizontalWheelScroll } from "@/hooks/kanban/useHorizontalWheelScroll";
+import { useHorizontalWheelScroll } from "@/hooks/kanban";
 import { cn } from "@/lib/utils";
 
 import type { Job, JobStatus } from "@/types/jobs.types";

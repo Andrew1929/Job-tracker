@@ -9,6 +9,7 @@ import {
   Prisma,
 } from '../../../../generated/prisma/client';
 import { AnalyticsService } from '../../analytics/services/analytics.service';
+import { NotificationScheduler } from '../../notification/services/notification-scheduler';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateJobDto } from '../dto/create-job.dto';
 import { QueryJobsDto } from '../dto/query-jobs.dto';
@@ -27,6 +28,7 @@ export class JobsService {
     private readonly prisma: PrismaService,
     private readonly companiesService: CompaniesService,
     private readonly analyticsService: AnalyticsService,
+    private readonly notificationScheduler: NotificationScheduler,
   ) {}
 
   async create(userId: string, dto: CreateJobDto): Promise<JobDetail> {
@@ -58,6 +60,12 @@ export class JobsService {
     });
 
     await this.analyticsService.invalidateCache(userId);
+    await this.notificationScheduler.syncNextActionReminder({
+      id: job.id,
+      userId,
+      status: job.status,
+      nextActionDate: job.nextActionDate,
+    });
 
     return job;
   }
@@ -150,10 +158,25 @@ export class JobsService {
 
     await this.analyticsService.invalidateCache(userId);
 
+    // Only re-sync when a field that affects the reminder actually changed, so
+    // editing unrelated job fields never churns the scheduled reminder.
+    if (dto.nextActionDate !== undefined || dto.status !== undefined) {
+      await this.notificationScheduler.syncNextActionReminder({
+        id: job.id,
+        userId,
+        status: job.status,
+        nextActionDate: job.nextActionDate,
+      });
+    }
+
     return job;
   }
 
   async remove(userId: string, id: string): Promise<void> {
+    // Cancel interview queue jobs before the cascade deletes the rows, otherwise
+    // we lose the interview ids needed to remove their deterministic job keys.
+    await this.notificationScheduler.cancelInterviewJobsForJob(id, userId);
+
     const { count } = await this.prisma.job.deleteMany({
       where: { id, userId },
     });
@@ -163,6 +186,7 @@ export class JobsService {
     }
 
     await this.analyticsService.invalidateCache(userId);
+    await this.notificationScheduler.cancelNextActionReminder(id);
   }
 
   private assertValidNextActionRange(query: QueryJobsDto): void {

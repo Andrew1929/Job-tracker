@@ -1,3 +1,5 @@
+import { parseDurationToMs } from "@/lib/auth/duration";
+
 export const APP_NAME = "JobTracker";
 
 export const APP_TAGLINE = {
@@ -27,3 +29,29 @@ export const AUTH_API_PATHS = {
 
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+
+/** Marks a login redirect caused by an expired session rather than a sign-out. */
+export const SESSION_EXPIRED_PARAM = "session";
+export const SESSION_EXPIRED_VALUE = "expired";
+
+export const AUTH_SESSION = {
+  /**
+   * Access tokens are deliberately short-lived. The session stays alive by
+   * refreshing them ahead of expiry rather than by extending the token.
+   */
+  refreshLeadMs: 60 * 1000,
+  idleTimeoutMs: parseDurationToMs(
+    process.env.NEXT_PUBLIC_AUTH_IDLE_TIMEOUT,
+    30 * 60 * 1000,
+  ),
+  /** One recorded activity per window is enough to keep the session alive. */
+  activityThrottleMs: 5 * 1000,
+} as const;
+
+export const AUTH_ACTIVITY_EVENTS = [
+  "pointerdown",
+  "keydown",
+  "scroll",
+  "touchstart",
+  "wheel",
+] as const;

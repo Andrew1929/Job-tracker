@@ -1,6 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 import { Prisma } from '../../../../generated/prisma/client';
 import { AnalyticsService } from '../../analytics/services/analytics.service';
+import { NotificationSchedulerService } from '../../notification/services/notification-scheduler.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JobSortField, QueryJobsDto, SortOrder } from '../dto/query-jobs.dto';
 import { CompaniesService } from './companies.service';
@@ -25,6 +26,7 @@ describe('JobsService.findMany', () => {
       prisma as unknown as PrismaService,
       {} as CompaniesService,
       {} as AnalyticsService,
+      {} as NotificationSchedulerService,
     );
   });
 

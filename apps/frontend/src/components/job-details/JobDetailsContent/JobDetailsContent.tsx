@@ -23,6 +23,7 @@ import {
 import { useDeleteJob, useJobQuery } from "@/hooks/jobs";
 import { getApiErrorMessage, isNotFoundError } from "@/lib/api/error-message";
 import { formatDateOnly } from "@/lib/date/date-only";
+import { formatDateTime } from "@/lib/date/date-time";
 import { formatDateValue } from "@/lib/format/date";
 import { formatSalaryRange } from "@/lib/format/salary";
 
@@ -183,8 +184,8 @@ export function JobDetailsContent({ jobId }: JobDetailsContentProps) {
             <DetailRow label="Applied date">
               {formatDateOnly(job.appliedAt)}
             </DetailRow>
-            <DetailRow label="Next action date">
-              {formatDateOnly(job.nextActionDate)}
+            <DetailRow label="Next action">
+              {formatDateTime(job.nextActionDate)}
             </DetailRow>
             <DetailRow label="Posting URL">
               {job.url ? (

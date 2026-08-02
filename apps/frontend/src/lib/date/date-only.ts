@@ -1,11 +1,13 @@
 /**
- * Date-only job fields (`appliedAt`, `nextActionDate`) are calendar dates, not
- * instants. The job form submits a `YYYY-MM-DD` value which is persisted as UTC
- * midnight, so reading those values through local-time accessors shifts them to
- * the previous day for every user behind UTC. Every consumer of a date-only
- * field must go through these helpers instead of `new Date(value).getDate()`.
+ * Date-only job fields (`appliedAt`) are calendar dates, not instants. The job
+ * form submits a `YYYY-MM-DD` value which is persisted as UTC midnight, so
+ * reading those values through local-time accessors shifts them to the previous
+ * day for every user behind UTC. Every consumer of a date-only field must go
+ * through these helpers instead of `new Date(value).getDate()`.
  *
- * Genuine timestamps such as `createdAt` keep using `@/lib/format/date`.
+ * `nextActionDate` is NOT one of these: it is a scheduled instant that drives a
+ * reminder, and belongs to `@/lib/date/date-time`. Genuine timestamps such as
+ * `createdAt` keep using `@/lib/format/date`.
  */
 
 const DATE_ONLY_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;

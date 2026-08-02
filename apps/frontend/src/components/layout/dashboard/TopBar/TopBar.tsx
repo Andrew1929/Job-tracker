@@ -1,8 +1,9 @@
 "use client";
 
-import { Bell, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 
 import { UserMenu } from "@/components/features/user-menu";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { SearchInput } from "@/components/shared/SearchInput";
 import { cn } from "@/lib/utils";
 
@@ -33,14 +34,7 @@ export function TopBar({ onMenuClick, className }: TopBarProps) {
       </div>
 
       <div className="flex items-center gap-2 sm:gap-4">
-        <button
-          type="button"
-          className="relative inline-flex size-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          aria-label="Notifications"
-        >
-          <Bell className="size-5" />
-        </button>
-
+        <NotificationBell />
         <UserMenu />
       </div>
     </header>

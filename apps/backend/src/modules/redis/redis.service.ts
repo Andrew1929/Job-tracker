@@ -68,10 +68,6 @@ export class RedisService implements OnModuleDestroy {
     return this.buildKey(REDIS_KEY_PREFIX.AUTH_REFRESH, userId, sessionId);
   }
 
-  getNotificationKey(userId: string, notificationId: string): string {
-    return this.buildKey(REDIS_KEY_PREFIX.NOTIFICATION, userId, notificationId);
-  }
-
   getAnalyticsKey(userId: string, metric: string): string {
     return this.buildKey(REDIS_KEY_PREFIX.ANALYTICS, userId, metric);
   }

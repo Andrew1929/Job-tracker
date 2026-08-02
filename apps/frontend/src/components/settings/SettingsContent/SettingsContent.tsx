@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { NotificationsSection } from "@/components/settings/NotificationsSection";
 import { PreferencesSection } from "@/components/settings/PreferencesSection";
 import { ProfileSection } from "@/components/settings/ProfileSection";
 import { SettingsPlaceholder } from "@/components/settings/SettingsPlaceholder";
@@ -24,9 +25,7 @@ export function SettingsContent() {
       <div className="pt-2">
         {activeTab === "profile" ? <ProfileSection /> : null}
         {activeTab === "preferences" ? <PreferencesSection /> : null}
-        {activeTab === "notifications" ? (
-          <SettingsPlaceholder tabId="notifications" title="Notifications" />
-        ) : null}
+        {activeTab === "notifications" ? <NotificationsSection /> : null}
         {activeTab === "appearance" ? (
           <SettingsPlaceholder tabId="appearance" title="Appearance" />
         ) : null}

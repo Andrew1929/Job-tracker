@@ -99,10 +99,24 @@ enum JobActivityType {
 }
 
 enum NotificationType {
-  JOB_UPDATE
+  NEXT_ACTION_REMINDER
+  NEXT_ACTION_OVERDUE
   INTERVIEW_REMINDER
+  INTERVIEW_FOLLOW_UP
+  APPLICATION_STALE
   SYSTEM
-  CUSTOM
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum NotificationEntityType {
+  JOB
+  INTERVIEW
 }
 
 model User {
@@ -117,11 +131,12 @@ model User {
   isActive            Boolean   @default(true)
   lastLoginAt         DateTime?
 
-  jobs           Job[]
-  interviews     Interview[]
-  notes          Note[]
-  notifications  Notification[]
-  companyReviews CompanyReview[]
+  jobs                    Job[]
+  interviews              Interview[]
+  notes                   Note[]
+  notifications           Notification[]
+  notificationPreferences NotificationPreferences?
+  companyReviews          CompanyReview[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -269,13 +284,27 @@ model JobActivity {
 }
 
 model Notification {
-  id      String           @id @default(uuid())
-  type    NotificationType
-  title   String
-  message String
-  read    Boolean          @default(false)
-  readAt  DateTime?
-  data    Json?
+  id       String               @id @default(uuid())
+  type     NotificationType
+  priority NotificationPriority @default(NORMAL)
+  title    String
+  message  String
+  actionUrl String?
+  read     Boolean              @default(false)
+  readAt   DateTime?
+
+  relatedEntityType NotificationEntityType?
+  relatedEntityId   String?
+  metadata          Json?
+
+  scheduledAt DateTime?
+  expiresAt   DateTime?
+
+  // Deterministic, source-date-derived key that makes notification creation
+  // idempotent across worker retries and manual queue recreation. Nullable so
+  // ad-hoc notifications (e.g. SYSTEM) are not forced to share the mechanism;
+  // Postgres allows multiple NULLs under a unique index.
+  dedupeKey String? @unique
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -283,7 +312,32 @@ model Notification {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId])
-  @@index([read])
-  @@index([createdAt])
+  @@index([userId, read, createdAt])
+  @@index([userId, createdAt])
+  @@index([scheduledAt])
+  @@index([relatedEntityType, relatedEntityId])
+}
+
+model NotificationPreferences {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  inAppEnabled                     Boolean @default(true)
+  nextActionRemindersEnabled       Boolean @default(true)
+  interviewRemindersEnabled        Boolean @default(true)
+  interviewFollowUpsEnabled        Boolean @default(true)
+  staleApplicationRemindersEnabled Boolean @default(true)
+
+  // IANA timezone (validated server-side). UTC fallback.
+  timezone String @default("UTC")
+
+  // Configurable offsets, persisted in minutes/days and validated server-side.
+  nextActionReminderLeadMinutes Int   @default(1440)
+  interviewReminderLeadMinutes  Int[] @default([1440, 120])
+  interviewFollowUpDelayMinutes Int   @default(1440)
+  staleApplicationThresholdDays Int   @default(7)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

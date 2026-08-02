@@ -27,9 +27,11 @@ import { cn } from "@/lib/utils";
 
 type LoginFormProps = {
   className?: string;
+  /** Set when the user was returned here by an inactivity or refresh timeout. */
+  isSessionExpired?: boolean;
 };
 
-export function LoginForm({ className }: LoginFormProps) {
+export function LoginForm({ className, isSessionExpired }: LoginFormProps) {
   const { login } = useAuth();
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -75,6 +77,16 @@ export function LoginForm({ className }: LoginFormProps) {
           className="space-y-5"
           noValidate
         >
+          {isSessionExpired && !formError ? (
+            <p
+              className="rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground"
+              role="status"
+            >
+              Your session expired after a period of inactivity. Please log in
+              again.
+            </p>
+          ) : null}
+
           {formError ? (
             <p className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive" role="alert">
               {formError}

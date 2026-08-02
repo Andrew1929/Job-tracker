@@ -1,9 +1,9 @@
 import {
   formatDateOnly,
   formatDateOnlyShort,
-  toDateOnlyKey,
   toLocalDateOnlyKey,
 } from "@/lib/date/date-only";
+import { toLocalDateKey } from "@/lib/date/date-time";
 import { formatDateValue } from "@/lib/format/date";
 import type {
   AnalyticsSummary,
@@ -153,16 +153,16 @@ type ScheduledInterview = {
 };
 
 /**
- * `nextActionDate` is a calendar date, so "upcoming" is a date comparison
- * against the user's today, not an instant comparison. Comparing instants would
- * drop an action scheduled for today as soon as local time passed UTC midnight.
+ * "Upcoming" compares local days rather than instants, so an action stays listed
+ * for the rest of the user's day instead of disappearing the moment its time
+ * passes. Both sides of the comparison use local components.
  */
 function toScheduledInterview(job: Job, todayKey: string): ScheduledInterview[] {
   if (job.status !== "INTERVIEWING") {
     return [];
   }
 
-  const dateKey = toDateOnlyKey(job.nextActionDate);
+  const dateKey = toLocalDateKey(job.nextActionDate);
   return dateKey && dateKey >= todayKey ? [{ job, dateKey }] : [];
 }
 

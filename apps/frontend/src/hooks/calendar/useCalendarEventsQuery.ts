@@ -3,7 +3,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { CALENDAR_EVENTS_PAGE_SIZE } from "@/constants/calendar.constants";
-import { dateOnlyKeyToIso } from "@/lib/date/date-only";
+import { localDayEndToIso, localDayStartToIso } from "@/lib/date/date-time";
 import { jobKeys } from "@/lib/query/query-keys";
 import { getJobs } from "@/services/jobs.service";
 
@@ -24,8 +24,10 @@ export function useCalendarEventsQuery(range: CalendarDateRange) {
   const params: JobsQueryParams = {
     page: 1,
     limit: CALENDAR_EVENTS_PAGE_SIZE,
-    nextActionFrom: dateOnlyKeyToIso(range.startKey),
-    nextActionTo: dateOnlyKeyToIso(range.endKey),
+    // Scheduled actions are instants, so the range spans the full local days at
+    // both ends rather than their opening midnights.
+    nextActionFrom: localDayStartToIso(range.startKey),
+    nextActionTo: localDayEndToIso(range.endKey),
     sortBy: "nextActionDate",
     sortOrder: "asc",
   };

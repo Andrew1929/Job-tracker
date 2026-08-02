@@ -1,0 +1,1 @@
+export { useHorizontalWheelScroll } from "./useHorizontalWheelScroll";

@@ -6,6 +6,7 @@ import {
   JobStatus,
   RemoteType,
 } from '../../../../generated/prisma/client';
+import { buildPaginationMeta } from '../../../common/utils/pagination.util';
 import { JobDetail, JobListItem } from '../types/job.types';
 
 @Exclude()
@@ -120,19 +121,9 @@ export class PaginatedJobsResponseDto {
     jobs: JobListItem[],
     pagination: { page: number; limit: number; total: number },
   ): PaginatedJobsResponseDto {
-    const { page, limit, total } = pagination;
-    const totalPages = limit > 0 ? Math.ceil(total / limit) : 0;
-
     return plainToInstance(PaginatedJobsResponseDto, {
       items: jobs.map((job) => JobResponseDto.fromEntity(job)),
-      meta: {
-        page,
-        limit,
-        total,
-        totalPages,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1,
-      },
+      meta: buildPaginationMeta(pagination),
     });
   }
 }

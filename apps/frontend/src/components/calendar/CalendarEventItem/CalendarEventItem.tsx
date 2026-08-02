@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { JobStatusBadge } from "@/components/jobs/JobStatusBadge";
+import { JOBS_ROUTES } from "@/constants/jobs.constants";
 import { formatDateOnlyShort } from "@/lib/date/date-only";
 
 import type { CalendarEvent } from "@/types/calendar.types";
@@ -17,7 +18,7 @@ export function CalendarEventItem({ event }: CalendarEventItemProps) {
   return (
     <li>
       <Link
-        href={`/jobs/${event.jobId}`}
+        href={JOBS_ROUTES.details(event.jobId)}
         className="flex items-start justify-between gap-3 rounded-sm py-3 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <span className="min-w-0">

@@ -7,9 +7,11 @@ import { Drawer } from "@/components/shared/Drawer";
 import { useCreateJob, useUpdateJob } from "@/hooks/jobs";
 import { getApiErrorMessage } from "@/lib/api/error-message";
 import { toDateOnlyKey } from "@/lib/date/date-only";
+import { toDateTimeLocalKey } from "@/lib/date/date-time";
 import {
   EMPTY_JOB_FORM_VALUES,
   toJobInput,
+  toJobUpdateInput,
   type JobFormValues,
 } from "@/lib/validations/job.schema";
 import type { Job, JobFormMode, JobStatus } from "@/types/jobs.types";
@@ -38,7 +40,7 @@ function jobToFormValues(job: Job): JobFormValues {
     salaryCurrency: job.salaryCurrency ?? "",
     url: job.url ?? "",
     appliedAt: toDateOnlyKey(job.appliedAt) ?? "",
-    nextActionDate: toDateOnlyKey(job.nextActionDate) ?? "",
+    nextActionDate: toDateTimeLocalKey(job.nextActionDate) ?? "",
     description: job.description ?? "",
   };
 }
@@ -66,13 +68,15 @@ export function JobFormDrawer({
 
   const handleSubmit = async (values: JobFormValues) => {
     setErrorMessage(null);
-    const input = toJobInput(values);
 
     try {
       const savedJob =
         isEdit && job
-          ? await updateJob.mutateAsync({ id: job.id, input })
-          : await createJob.mutateAsync(input);
+          ? await updateJob.mutateAsync({
+              id: job.id,
+              input: toJobUpdateInput(values),
+            })
+          : await createJob.mutateAsync(toJobInput(values));
 
       onSuccess?.(savedJob);
       onClose();

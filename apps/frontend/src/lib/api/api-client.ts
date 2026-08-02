@@ -1,5 +1,7 @@
-import { API_BASE_URL } from "@/constants/auth.constants";
-import { getAccessToken } from "@/lib/auth/token.storage";
+import { API_BASE_URL, AUTH_API_PATHS } from "@/constants/auth.constants";
+import { emitSessionEnded } from "@/lib/auth/session-events";
+import { sessionRefresher } from "@/lib/auth/session-refresh";
+import { clearAuthTokens, getAccessToken } from "@/lib/auth/token.storage";
 
 export class ApiError extends Error {
   readonly statusCode: number;
@@ -44,6 +46,41 @@ function buildUrl(
   return queryString ? `${url}?${queryString}` : url;
 }
 
+/** The auth endpoints own the session; retrying them here would recurse. */
+function isAuthPath(path: string): boolean {
+  return Object.values(AUTH_API_PATHS).some((authPath) =>
+    path.startsWith(authPath),
+  );
+}
+
+async function sendRequest(
+  path: string,
+  options: RequestOptions,
+): Promise<Response> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  const accessToken = getAccessToken();
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`;
+  }
+
+  try {
+    return await fetch(buildUrl(path, options.query), {
+      method: options.method ?? "GET",
+      headers,
+      body: options.body ? JSON.stringify(options.body) : undefined,
+      signal: options.signal,
+    });
+  } catch {
+    throw new ApiError(
+      "Unable to reach the server. Check your connection and try again.",
+      0,
+    );
+  }
+}
+
 async function parseErrorMessage(response: Response): Promise<string | null> {
   try {
     const data = (await response.json()) as ApiErrorBody;
@@ -66,28 +103,20 @@ export async function apiRequest<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
+  let response = await sendRequest(path, options);
 
-  const accessToken = getAccessToken();
-  if (accessToken) {
-    headers.Authorization = `Bearer ${accessToken}`;
-  }
+  // A short-lived access token expires during normal use. One refresh-and-retry
+  // keeps that invisible; a second attempt would mean the session is genuinely
+  // gone, so it ends instead of looping.
+  if (response.status === 401 && !isAuthPath(path)) {
+    const isSessionAlive = await sessionRefresher.refresh();
 
-  let response: Response;
-  try {
-    response = await fetch(buildUrl(path, options.query), {
-      method: options.method ?? "GET",
-      headers,
-      body: options.body ? JSON.stringify(options.body) : undefined,
-      signal: options.signal,
-    });
-  } catch {
-    throw new ApiError(
-      "Unable to reach the server. Check your connection and try again.",
-      0,
-    );
+    if (!isSessionAlive) {
+      clearAuthTokens();
+      emitSessionEnded();
+    } else {
+      response = await sendRequest(path, options);
+    }
   }
 
   if (!response.ok) {

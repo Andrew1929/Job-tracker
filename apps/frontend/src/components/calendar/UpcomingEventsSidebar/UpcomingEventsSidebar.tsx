@@ -2,7 +2,10 @@
 
 import { useMemo } from "react";
 
+import { CalendarDays } from "lucide-react";
+
 import { CalendarEventItem } from "@/components/calendar/CalendarEventItem";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Skeleton } from "@/components/shared/Skeleton";
 import {
@@ -12,7 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CALENDAR_UPCOMING_EVENTS_LIMIT } from "@/constants/calendar.constants";
-import { useUpcomingEventsQuery } from "@/hooks/calendar/useUpcomingEventsQuery";
+import { useUpcomingEventsQuery } from "@/hooks/calendar";
 import { getApiErrorMessage } from "@/lib/api/error-message";
 import { mapJobsToCalendarEvents } from "@/lib/calendar/map-calendar-events";
 import { todayDateOnlyKey } from "@/lib/date/date-only";
@@ -61,9 +64,12 @@ export function UpcomingEventsSidebar({ className }: UpcomingEventsSidebarProps)
 
     if (events.length === 0) {
       return (
-        <p className="py-6 text-sm text-muted-foreground">
-          No upcoming actions scheduled.
-        </p>
+        <EmptyState
+          icon={CalendarDays}
+          title="Nothing upcoming"
+          description="No job has a next action scheduled from today onward."
+          className="py-8"
+        />
       );
     }
 

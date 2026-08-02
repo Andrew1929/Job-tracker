@@ -3,38 +3,42 @@
 import { useState } from "react";
 
 import { NotificationList } from "@/components/notifications/NotificationList";
+import { ErrorState } from "@/components/shared/ErrorState";
+import { Skeleton } from "@/components/shared/Skeleton";
 import { Button } from "@/components/ui/button";
-import { MOCK_NOTIFICATIONS, NOTIFICATION_TABS } from "@/constants/notifications.constants";
+import {
+  NOTIFICATION_PAGE_LIMIT,
+  NOTIFICATION_TABS,
+} from "@/constants/notifications.constants";
+import {
+  useDeleteNotification,
+  useMarkAllNotificationsRead,
+  useMarkNotificationRead,
+  useNotificationsQuery,
+} from "@/hooks/notifications";
+import { getApiErrorMessage } from "@/lib/api/error-message";
 import { cn } from "@/lib/utils";
-
-import type { NotificationItem, NotificationTabId } from "@/types/notifications.types";
-
-function filterNotifications(
-  notifications: NotificationItem[],
-  activeTab: NotificationTabId,
-): NotificationItem[] {
-  switch (activeTab) {
-    case "unread":
-      return notifications.filter((notification) => !notification.isRead);
-    case "mentions":
-      return notifications.filter((notification) => notification.isMention);
-    default:
-      return notifications;
-  }
-}
+import type { NotificationTabId } from "@/types/notifications.types";
 
 export function NotificationsContent() {
-  const [notifications, setNotifications] =
-    useState<NotificationItem[]>(MOCK_NOTIFICATIONS);
   const [activeTab, setActiveTab] = useState<NotificationTabId>("all");
 
-  const visibleNotifications = filterNotifications(notifications, activeTab);
+  // Reminders are created by a background worker, never by a request this page
+  // makes, so the list has to poll to pick them up without a reload.
+  const query = useNotificationsQuery(
+    {
+      page: 1,
+      limit: NOTIFICATION_PAGE_LIMIT,
+      unreadOnly: activeTab === "unread" ? true : undefined,
+    },
+    { poll: true },
+  );
 
-  const markAllAsRead = () => {
-    setNotifications((current) =>
-      current.map((notification) => ({ ...notification, isRead: true })),
-    );
-  };
+  const markRead = useMarkNotificationRead();
+  const markAllRead = useMarkAllNotificationsRead();
+  const deleteNotification = useDeleteNotification();
+
+  const notifications = query.data?.items ?? [];
 
   return (
     <div className="space-y-6">
@@ -46,7 +50,8 @@ export function NotificationsContent() {
           type="button"
           variant="link"
           className="h-auto p-0 text-primary"
-          onClick={markAllAsRead}
+          disabled={markAllRead.isPending || notifications.every((n) => n.read)}
+          onClick={() => markAllRead.mutate()}
         >
           Mark all as read
         </Button>
@@ -87,7 +92,33 @@ export function NotificationsContent() {
         role="tabpanel"
         aria-labelledby={`notifications-tab-${activeTab}`}
       >
-        <NotificationList notifications={visibleNotifications} />
+        {query.isLoading ? (
+          <div
+            className="space-y-3 rounded-xl border border-border/60 bg-card p-4"
+            aria-busy="true"
+            aria-label="Loading notifications"
+          >
+            {Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={index} className="h-16 rounded-lg" />
+            ))}
+          </div>
+        ) : null}
+
+        {query.isError ? (
+          <ErrorState
+            message={getApiErrorMessage(query.error)}
+            onRetry={() => void query.refetch()}
+            isRetrying={query.isFetching}
+          />
+        ) : null}
+
+        {!query.isLoading && !query.isError ? (
+          <NotificationList
+            notifications={notifications}
+            onMarkRead={(id) => markRead.mutate(id)}
+            onDelete={(id) => deleteNotification.mutate(id)}
+          />
+        ) : null}
       </div>
     </div>
   );

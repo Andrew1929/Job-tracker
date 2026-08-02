@@ -13,10 +13,13 @@ export type User = {
   updatedAt: string;
 };
 
-export type AuthResponse = {
-  user: User;
+export type AuthTokens = {
   accessToken: string;
   refreshToken: string;
+};
+
+export type AuthResponse = AuthTokens & {
+  user: User;
 };
 
 export type LoginInput = {
@@ -29,16 +32,3 @@ export type RegisterInput = {
   password: string;
   name?: string;
 };
-
-export type LoginFormValues = {
-  email: string;
-  password: string;
-};
-
-export type RegisterFormValues = {
-  fullName: string;
-  email: string;
-  password: string;
-};
-
-export type AuthFormState = "idle" | "loading" | "error" | "success";

@@ -1,66 +1,56 @@
-import type { NotificationItem, NotificationTab } from "@/types/notifications.types";
+import type {
+  NotificationTab,
+  NotificationsQueryParams,
+} from "@/types/notifications.types";
+import type { SelectOption } from "@/types/select-option.types";
+
+export const NOTIFICATIONS_ROUTES = {
+  list: "/notifications",
+} as const;
+
+export const NOTIFICATIONS_API_PATHS = {
+  list: "/api/notifications",
+  unreadCount: "/api/notifications/unread-count",
+  read: (id: string) => `/api/notifications/${id}/read`,
+  readAll: "/api/notifications/read-all",
+  byId: (id: string) => `/api/notifications/${id}`,
+  preferences: "/api/notification-preferences",
+} as const;
 
 export const NOTIFICATION_TABS: readonly NotificationTab[] = [
   { id: "all", label: "All" },
   { id: "unread", label: "Unread" },
-  { id: "mentions", label: "Mentions" },
 ];
 
-export const MOCK_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: "1",
-    title: "Google interview scheduled for tomorrow at 10:00 AM",
-    timestamp: "May 15, 2024 • 10:00 AM",
-    isRead: false,
-    isMention: false,
-    iconType: "company",
-    companyInitial: "G",
-    companyColor: "bg-blue-500",
-  },
-  {
-    id: "2",
-    title: "Amazon follow-up is overdue",
-    timestamp: "May 14, 2024 • 3:30 PM",
-    isRead: true,
-    isMention: false,
-    iconType: "company",
-    companyInitial: "A",
-    companyColor: "bg-orange-500",
-  },
-  {
-    id: "3",
-    title: "Stripe has moved your application to Offer stage 🎉",
-    timestamp: "May 13, 2024 • 9:15 AM",
-    isRead: true,
-    isMention: true,
-    iconType: "company",
-    companyInitial: "S",
-    companyColor: "bg-indigo-500",
-  },
-  {
-    id: "4",
-    title: "New job added to Applied column",
-    timestamp: "May 12, 2024 • 5:00 PM",
-    isRead: true,
-    isMention: false,
-    iconType: "briefcase",
-  },
-  {
-    id: "5",
-    title: "Microsoft interview feedback received",
-    timestamp: "May 11, 2024 • 1:45 PM",
-    isRead: true,
-    isMention: true,
-    iconType: "company",
-    companyInitial: "M",
-    companyColor: "bg-sky-600",
-  },
-  {
-    id: "6",
-    title: "Weekly summary is ready",
-    timestamp: "May 10, 2024 • 8:00 AM",
-    isRead: true,
-    isMention: false,
-    iconType: "chart",
-  },
+/** Recent items shown in the TopBar dropdown. */
+export const NOTIFICATION_DROPDOWN_LIMIT = 8;
+
+/** Full page default page size. */
+export const NOTIFICATION_PAGE_LIMIT = 20;
+
+/** Lightweight polling for unread count / recent list (ms). */
+export const NOTIFICATION_POLL_INTERVAL_MS = 45_000;
+
+export const NOTIFICATION_DROPDOWN_PARAMS: NotificationsQueryParams = {
+  page: 1,
+  limit: NOTIFICATION_DROPDOWN_LIMIT,
+};
+
+/** IANA timezones for notification delivery windows. */
+export const NOTIFICATION_TIMEZONE_OPTIONS: SelectOption[] = [
+  { value: "UTC", label: "UTC" },
+  { value: "America/New_York", label: "America/New_York" },
+  { value: "America/Chicago", label: "America/Chicago" },
+  { value: "America/Denver", label: "America/Denver" },
+  { value: "America/Los_Angeles", label: "America/Los_Angeles" },
+  { value: "America/Sao_Paulo", label: "America/Sao_Paulo" },
+  { value: "Europe/London", label: "Europe/London" },
+  { value: "Europe/Berlin", label: "Europe/Berlin" },
+  { value: "Europe/Warsaw", label: "Europe/Warsaw" },
+  { value: "Europe/Paris", label: "Europe/Paris" },
+  { value: "Asia/Dubai", label: "Asia/Dubai" },
+  { value: "Asia/Kolkata", label: "Asia/Kolkata" },
+  { value: "Asia/Singapore", label: "Asia/Singapore" },
+  { value: "Asia/Tokyo", label: "Asia/Tokyo" },
+  { value: "Australia/Sydney", label: "Australia/Sydney" },
 ];

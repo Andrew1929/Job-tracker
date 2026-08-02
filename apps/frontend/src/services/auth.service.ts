@@ -11,6 +11,7 @@ import {
 } from "@/lib/auth/token.storage";
 import type {
   AuthResponse,
+  AuthTokens,
   LoginInput,
   RegisterInput,
   User,
@@ -93,6 +94,29 @@ export async function register(input: RegisterInput): Promise<User> {
   });
 
   return persistAuthSession(response);
+}
+
+/**
+ * Rotates the stored pair. The backend revokes the presented refresh token, so
+ * the new pair must be persisted before any other request runs.
+ */
+export async function refreshAuthTokens(): Promise<void> {
+  const refreshToken = getRefreshToken();
+
+  if (!refreshToken) {
+    throw new AuthApiError("Not authenticated", 401);
+  }
+
+  const response = await apiRequest<AuthTokens>(AUTH_API_PATHS.refresh, {
+    method: "POST",
+    body: { refreshToken },
+  });
+
+  if (!response?.accessToken || !response?.refreshToken) {
+    throw new AuthApiError("Invalid refresh response from server", 500);
+  }
+
+  setAuthTokens(response.accessToken, response.refreshToken);
 }
 
 export async function getCurrentUser(): Promise<User> {

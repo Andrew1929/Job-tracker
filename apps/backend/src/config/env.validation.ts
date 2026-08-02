@@ -60,6 +60,11 @@ export class EnvironmentVariables {
 
   @IsOptional()
   AUTH_USE_COOKIES: string = 'false';
+
+  // Enables the BullMQ-backed notification queue. Requires Redis >= 5.0.0.
+  // Left disabled by default so environments with older Redis start normally.
+  @IsOptional()
+  NOTIFICATION_QUEUE_ENABLED: string = 'false';
 }
 
 export function validate(

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import test, { afterEach, describe } from "node:test";
+import test, { afterEach, beforeEach, describe } from "node:test";
 
 import type { Job } from "@/types/jobs.types";
 
@@ -9,6 +9,12 @@ import {
 } from "./map-calendar-events.ts";
 
 const originalTimezone = process.env.TZ;
+
+// `nextActionDate` is an instant rendered on the user's local day, so the
+// fixtures below only have a predictable date key under a pinned timezone.
+beforeEach(() => {
+  process.env.TZ = "UTC";
+});
 
 afterEach(() => {
   process.env.TZ = originalTimezone;
@@ -48,7 +54,7 @@ describe("mapJobsToCalendarEvents", () => {
         id: "job-1",
         title: "Platform Engineer",
         status: "INTERVIEWING",
-        nextActionDate: "2026-08-05T00:00:00.000Z",
+        nextActionDate: "2026-08-05T12:00:00.000Z",
         company: { id: "c1", name: "Acme", website: null },
       }),
     ]);
@@ -66,8 +72,16 @@ describe("mapJobsToCalendarEvents", () => {
 
   test("keeps jobs of every status, not just interviews", () => {
     const events = mapJobsToCalendarEvents([
-      makeJob({ id: "a", status: "SAVED", nextActionDate: "2026-08-05T00:00:00.000Z" }),
-      makeJob({ id: "b", status: "OFFER", nextActionDate: "2026-08-05T00:00:00.000Z" }),
+      makeJob({
+        id: "a",
+        status: "SAVED",
+        nextActionDate: "2026-08-05T12:00:00.000Z",
+      }),
+      makeJob({
+        id: "b",
+        status: "OFFER",
+        nextActionDate: "2026-08-05T12:00:00.000Z",
+      }),
     ]);
 
     assert.deepEqual(
@@ -88,7 +102,11 @@ describe("mapJobsToCalendarEvents", () => {
 
   test("falls back to a null company name", () => {
     const [event] = mapJobsToCalendarEvents([
-      makeJob({ id: "a", company: null, nextActionDate: "2026-08-05T00:00:00.000Z" }),
+      makeJob({
+        id: "a",
+        company: null,
+        nextActionDate: "2026-08-05T12:00:00.000Z",
+      }),
     ]);
 
     assert.equal(event.companyName, null);
@@ -96,9 +114,9 @@ describe("mapJobsToCalendarEvents", () => {
 
   test("sorts events returned out of chronological order", () => {
     const events = mapJobsToCalendarEvents([
-      makeJob({ id: "c", nextActionDate: "2026-08-20T00:00:00.000Z" }),
-      makeJob({ id: "a", nextActionDate: "2026-08-01T00:00:00.000Z" }),
-      makeJob({ id: "b", nextActionDate: "2026-08-10T00:00:00.000Z" }),
+      makeJob({ id: "c", nextActionDate: "2026-08-20T12:00:00.000Z" }),
+      makeJob({ id: "a", nextActionDate: "2026-08-01T12:00:00.000Z" }),
+      makeJob({ id: "b", nextActionDate: "2026-08-10T12:00:00.000Z" }),
     ]);
 
     assert.deepEqual(
@@ -109,9 +127,21 @@ describe("mapJobsToCalendarEvents", () => {
 
   test("orders same-day events deterministically by title then id", () => {
     const jobs = [
-      makeJob({ id: "z", title: "Beta", nextActionDate: "2026-08-05T00:00:00.000Z" }),
-      makeJob({ id: "a", title: "Alpha", nextActionDate: "2026-08-05T00:00:00.000Z" }),
-      makeJob({ id: "b", title: "Alpha", nextActionDate: "2026-08-05T00:00:00.000Z" }),
+      makeJob({
+        id: "z",
+        title: "Beta",
+        nextActionDate: "2026-08-05T12:00:00.000Z",
+      }),
+      makeJob({
+        id: "a",
+        title: "Alpha",
+        nextActionDate: "2026-08-05T12:00:00.000Z",
+      }),
+      makeJob({
+        id: "b",
+        title: "Alpha",
+        nextActionDate: "2026-08-05T12:00:00.000Z",
+      }),
     ];
 
     const forward = mapJobsToCalendarEvents(jobs).map((event) => event.id);
@@ -125,23 +155,39 @@ describe("mapJobsToCalendarEvents", () => {
 
   test("keeps look-alike jobs apart by id", () => {
     const events = mapJobsToCalendarEvents([
-      makeJob({ id: "first", title: "Same", nextActionDate: "2026-08-05T00:00:00.000Z" }),
-      makeJob({ id: "second", title: "Same", nextActionDate: "2026-08-05T00:00:00.000Z" }),
+      makeJob({
+        id: "first",
+        title: "Same",
+        nextActionDate: "2026-08-05T12:00:00.000Z",
+      }),
+      makeJob({
+        id: "second",
+        title: "Same",
+        nextActionDate: "2026-08-05T12:00:00.000Z",
+      }),
     ]);
 
     const ids = events.map((event) => event.id);
     assert.equal(new Set(ids).size, ids.length);
   });
 
-  test("places an event on the same date east and west of UTC", () => {
-    const job = makeJob({ id: "a", nextActionDate: "2026-08-05T00:00:00.000Z" });
+  test("places an event on the local day the user sees, not the UTC day", () => {
+    // 22:00 UTC is already the next calendar day in UTC+14 and still the
+    // previous one in UTC-11.
+    const job = makeJob({ id: "a", nextActionDate: "2026-08-05T22:00:00.000Z" });
 
-    for (const timeZone of ["Pacific/Kiritimati", "UTC", "Pacific/Midway"]) {
+    const expectedByTimezone = {
+      "Pacific/Kiritimati": "2026-08-06", // UTC+14
+      UTC: "2026-08-05",
+      "Pacific/Midway": "2026-08-05", // UTC-11
+    };
+
+    for (const [timeZone, expected] of Object.entries(expectedByTimezone)) {
       process.env.TZ = timeZone;
       assert.equal(
         mapJobsToCalendarEvents([job])[0].dateKey,
-        "2026-08-05",
-        `shifted in ${timeZone}`,
+        expected,
+        `wrong day in ${timeZone}`,
       );
     }
   });
@@ -154,9 +200,21 @@ describe("groupEventsByDateKey", () => {
 
   test("collects several events under one date and preserves their order", () => {
     const events = mapJobsToCalendarEvents([
-      makeJob({ id: "a", title: "Alpha", nextActionDate: "2026-08-05T00:00:00.000Z" }),
-      makeJob({ id: "b", title: "Beta", nextActionDate: "2026-08-05T00:00:00.000Z" }),
-      makeJob({ id: "c", title: "Gamma", nextActionDate: "2026-08-06T00:00:00.000Z" }),
+      makeJob({
+        id: "a",
+        title: "Alpha",
+        nextActionDate: "2026-08-05T12:00:00.000Z",
+      }),
+      makeJob({
+        id: "b",
+        title: "Beta",
+        nextActionDate: "2026-08-05T12:00:00.000Z",
+      }),
+      makeJob({
+        id: "c",
+        title: "Gamma",
+        nextActionDate: "2026-08-06T12:00:00.000Z",
+      }),
     ]);
 
     const grouped = groupEventsByDateKey(events);

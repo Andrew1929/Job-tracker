@@ -9,7 +9,7 @@ import { CalendarToolbar } from "@/components/calendar/CalendarToolbar";
 import { CalendarWeekView } from "@/components/calendar/CalendarWeekView";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Card, CardContent } from "@/components/ui/card";
-import { useCalendarEventsQuery } from "@/hooks/calendar/useCalendarEventsQuery";
+import { useCalendarEventsQuery } from "@/hooks/calendar";
 import { getApiErrorMessage } from "@/lib/api/error-message";
 import {
   buildDay,

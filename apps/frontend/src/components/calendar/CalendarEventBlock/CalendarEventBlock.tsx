@@ -4,6 +4,7 @@ import { JobStatusBadge } from "@/components/jobs/JobStatusBadge";
 import {
   JOB_STATUS_BADGE_CLASSES,
   JOB_STATUS_LABELS,
+  JOBS_ROUTES,
 } from "@/constants/jobs.constants";
 import { cn } from "@/lib/utils";
 
@@ -40,7 +41,7 @@ export function CalendarEventBlock({
 
   return (
     <Link
-      href={`/jobs/${event.jobId}`}
+      href={JOBS_ROUTES.details(event.jobId)}
       className={className}
       aria-label={buildAccessibleLabel(event)}
     >
