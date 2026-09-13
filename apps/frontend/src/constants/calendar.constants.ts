@@ -26,3 +26,7 @@ export const CALENDAR_EVENTS_PAGE_SIZE = 100;
 export const CALENDAR_MONTH_CELL_EVENT_LIMIT = 3;
 
 export const CALENDAR_UPCOMING_EVENTS_LIMIT = 5;
+
+export const CALENDAR_ROUTES = {
+  list: "/calendar",
+} as const;

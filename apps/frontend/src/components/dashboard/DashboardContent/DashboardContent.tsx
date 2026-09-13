@@ -24,18 +24,18 @@ import { cn } from "@/lib/utils";
 
 function DashboardSkeleton() {
   return (
-    <div className="space-y-6" aria-busy="true" aria-label="Loading dashboard">
+    <div className="space-y-5" aria-busy="true" aria-label="Loading dashboard">
       <Skeleton className="h-8 w-40" />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <Skeleton key={index} className="h-32 rounded-xl" />
+          <Skeleton key={index} className="h-24 rounded-xl" />
         ))}
       </div>
       <div className="grid gap-6 xl:grid-cols-3">
-        <Skeleton className="h-80 rounded-xl xl:col-span-2" />
-        <Skeleton className="h-80 rounded-xl" />
+        <Skeleton className="h-64 rounded-xl xl:col-span-2" />
+        <Skeleton className="h-64 rounded-xl" />
       </div>
-      <Skeleton className="h-64 rounded-xl" />
+      <Skeleton className="h-56 rounded-xl" />
     </div>
   );
 }
@@ -50,7 +50,7 @@ export function DashboardContent() {
 
   if (analyticsQuery.isError || jobsQuery.isError) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-5">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
           Dashboard
         </h1>
@@ -88,7 +88,7 @@ export function DashboardContent() {
 
   return (
     <div
-      className={cn("space-y-6 transition-opacity", isRefreshing && "opacity-70")}
+      className={cn("space-y-5 transition-opacity", isRefreshing && "opacity-70")}
       aria-busy={isRefreshing}
     >
       <h1 className="text-2xl font-bold tracking-tight text-foreground">

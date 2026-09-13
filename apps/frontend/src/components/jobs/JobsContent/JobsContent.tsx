@@ -68,11 +68,11 @@ export function JobsContent() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex min-h-full flex-col gap-6">
       <JobsHeader onAddJob={() => setFormState({ mode: "create" })} />
 
-      <Card className="rounded-xl shadow-sm">
-        <CardContent className="space-y-6 p-6">
+      <Card className="flex flex-1 flex-col">
+        <CardContent className="flex flex-1 flex-col gap-6">
           <JobsFilters
             searchQuery={filters.searchInput}
             onSearchChange={filters.handleSearchChange}

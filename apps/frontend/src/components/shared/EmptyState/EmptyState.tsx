@@ -8,6 +8,8 @@ type EmptyStateProps = {
   description?: string;
   action?: React.ReactNode;
   className?: string;
+  /** Fills and centers within the available parent height instead of using fixed vertical padding. */
+  fill?: boolean;
 };
 
 export function EmptyState({
@@ -16,11 +18,13 @@ export function EmptyState({
   description,
   action,
   className,
+  fill,
 }: EmptyStateProps) {
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-3 py-16 text-center",
+        "flex flex-col items-center justify-center gap-3 text-center",
+        fill ? "flex-1 py-6" : "py-16",
         className,
       )}
     >

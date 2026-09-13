@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CHART_HEIGHT, CHART_PADDING, CHART_WIDTH } from "@/constants/chart.constants";
 import { buildYAxisTicks, niceAxisMax } from "@/lib/analytics/map-analytics";
 import { buildLinePath, buildLinePoints } from "@/lib/chart/line-path";
 import { cn } from "@/lib/utils";
@@ -9,10 +10,6 @@ type ApplicationsChartProps = {
   data: ChartDataPoint[];
   className?: string;
 };
-
-const CHART_HEIGHT = 240;
-const CHART_WIDTH = 640;
-const CHART_PADDING = { top: 16, right: 8, bottom: 32, left: 36 };
 
 export function ApplicationsChart({ data, className }: ApplicationsChartProps) {
   const labels = data.map((point) => point.label);
@@ -39,11 +36,9 @@ export function ApplicationsChart({ data, className }: ApplicationsChartProps) {
   const innerHeight = CHART_HEIGHT - CHART_PADDING.top - CHART_PADDING.bottom;
 
   return (
-    <Card className={cn("min-w-0 rounded-xl shadow-sm", className)}>
-      <CardHeader className="pb-4">
-        <CardTitle className="text-base font-semibold">
-          Applications Over Time
-        </CardTitle>
+    <Card className={cn("min-w-0", className)}>
+      <CardHeader className="pb-3">
+        <CardTitle>Applications Over Time</CardTitle>
       </CardHeader>
       <CardContent className="min-w-0 pt-0">
         <div className="w-full overflow-x-auto">

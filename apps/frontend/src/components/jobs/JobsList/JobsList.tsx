@@ -64,12 +64,19 @@ export function JobsList({
   }
 
   if (isError) {
-    return <ErrorState message={errorMessage} onRetry={onRetry} />;
+    return (
+      <ErrorState
+        message={errorMessage}
+        onRetry={onRetry}
+        className="flex-1 py-6"
+      />
+    );
   }
 
   if (jobs.length === 0) {
     return (
       <EmptyState
+        fill
         icon={Briefcase}
         title={hasActiveFilters ? "No jobs match your filters" : "No jobs yet"}
         description={

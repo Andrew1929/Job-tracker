@@ -16,7 +16,7 @@ function formatActionCount(count: number): string {
 
 export function CalendarDayView({ day, events }: CalendarDayViewProps) {
   return (
-    <div className="rounded-lg border border-border/60">
+    <div className="flex flex-1 flex-col rounded-lg border border-border/60">
       <div className="flex items-center justify-between gap-3 border-b border-border/60 px-4 py-3">
         <p className="text-sm text-muted-foreground">
           {formatActionCount(events.length)}
@@ -38,6 +38,7 @@ export function CalendarDayView({ day, events }: CalendarDayViewProps) {
         </ul>
       ) : (
         <EmptyState
+          fill
           icon={CalendarDays}
           title="Nothing scheduled"
           description="No job has a next action planned for this day."

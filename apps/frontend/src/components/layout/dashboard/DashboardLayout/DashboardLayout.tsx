@@ -22,7 +22,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex h-dvh overflow-hidden bg-background">
       <Sidebar className="hidden lg:flex" />
 
       {mobileNavOpen ? (
@@ -42,7 +42,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar onMenuClick={openMobileNav} />
-        <main className={cn("flex-1 overflow-auto p-4 sm:p-6 lg:p-8")}>
+        <main
+          className={cn("min-h-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-6")}
+        >
           {children}
         </main>
       </div>

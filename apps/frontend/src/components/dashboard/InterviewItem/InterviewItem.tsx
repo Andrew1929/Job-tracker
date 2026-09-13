@@ -8,7 +8,7 @@ type InterviewItemProps = {
 
 export function InterviewItem({ interview }: InterviewItemProps) {
   return (
-    <li className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+    <li className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
       <CompanyAvatar
         initial={interview.companyInitial}
         colorClass={interview.companyColor}

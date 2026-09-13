@@ -5,7 +5,6 @@ import { ApplicationRow } from "@/components/dashboard/ApplicationRow";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { JOBS_ROUTES } from "@/constants/jobs.constants";
-import { cn } from "@/lib/utils";
 
 import type { RecentApplication } from "@/types/dashboard.types";
 
@@ -19,11 +18,9 @@ export function RecentApplications({
   className,
 }: RecentApplicationsProps) {
   return (
-    <Card className={cn("rounded-xl shadow-sm", className)}>
-      <CardHeader className="pb-4">
-        <CardTitle className="text-base font-semibold">
-          Recent Applications
-        </CardTitle>
+    <Card className={className}>
+      <CardHeader className="pb-3">
+        <CardTitle>Recent Applications</CardTitle>
       </CardHeader>
       <CardContent className="overflow-x-auto pt-0">
         {applications.length > 0 ? (

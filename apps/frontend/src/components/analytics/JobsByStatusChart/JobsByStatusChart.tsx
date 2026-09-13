@@ -23,9 +23,9 @@ export function JobsByStatusChart({
   let rotation = -90;
 
   return (
-    <Card className={cn("min-w-0 rounded-xl shadow-sm", className)}>
-      <CardHeader className="pb-4">
-        <CardTitle className="text-base font-semibold">Jobs by Status</CardTitle>
+    <Card className={cn("min-w-0", className)}>
+      <CardHeader className="pb-3">
+        <CardTitle>Jobs by Status</CardTitle>
       </CardHeader>
       <CardContent className="min-w-0 pt-0">
         <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">

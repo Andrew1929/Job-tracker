@@ -107,7 +107,7 @@ export function CalendarContent({ className }: CalendarContentProps) {
     return (
       <div
         className={cn(
-          "space-y-4 transition-opacity",
+          "flex flex-1 flex-col space-y-4 transition-opacity",
           eventsQuery.isFetching && "opacity-60",
         )}
         aria-busy={eventsQuery.isFetching}
@@ -126,8 +126,8 @@ export function CalendarContent({ className }: CalendarContentProps) {
   };
 
   return (
-    <Card className={cn("rounded-xl shadow-sm", className)}>
-      <CardContent className="space-y-4 p-6">
+    <Card className={cn("flex-1", className)}>
+      <CardContent className="flex flex-1 flex-col gap-4 p-5">
         <CalendarToolbar
           title={formatCalendarRangeTitle(focusedDate, view)}
           view={view}

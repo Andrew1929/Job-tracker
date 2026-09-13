@@ -57,7 +57,7 @@ export function UpcomingEventsSidebar({ className }: UpcomingEventsSidebarProps)
           message={getApiErrorMessage(upcomingQuery.error)}
           onRetry={() => void upcomingQuery.refetch()}
           isRetrying={upcomingQuery.isFetching}
-          className="py-8"
+          className="flex-1 py-6"
         />
       );
     }
@@ -65,10 +65,10 @@ export function UpcomingEventsSidebar({ className }: UpcomingEventsSidebarProps)
     if (events.length === 0) {
       return (
         <EmptyState
+          fill
           icon={CalendarDays}
           title="Nothing upcoming"
           description="No job has a next action scheduled from today onward."
-          className="py-8"
         />
       );
     }
@@ -83,13 +83,13 @@ export function UpcomingEventsSidebar({ className }: UpcomingEventsSidebarProps)
   };
 
   return (
-    <Card className={cn("rounded-xl shadow-sm", className)}>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base font-semibold">
-          Upcoming Events
-        </CardTitle>
+    <Card className={cn("flex-1", className)}>
+      <CardHeader className="pb-3">
+        <CardTitle>Upcoming Events</CardTitle>
       </CardHeader>
-      <CardContent className="pt-0">{renderBody()}</CardContent>
+      <CardContent className="flex flex-1 flex-col pt-0">
+        {renderBody()}
+      </CardContent>
     </Card>
   );
 }

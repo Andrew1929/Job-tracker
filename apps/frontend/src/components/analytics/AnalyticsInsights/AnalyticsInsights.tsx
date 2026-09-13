@@ -15,9 +15,9 @@ export function AnalyticsInsights({
   className,
 }: AnalyticsInsightsProps) {
   return (
-    <Card className={cn("flex min-w-0 flex-col rounded-xl shadow-sm", className)}>
-      <CardHeader className="pb-4">
-        <CardTitle className="text-base font-semibold">Insights</CardTitle>
+    <Card className={cn("flex min-w-0 flex-col", className)}>
+      <CardHeader className="pb-3">
+        <CardTitle>Insights</CardTitle>
       </CardHeader>
       <CardContent className="flex min-w-0 flex-1 flex-col pt-0">
         {insights.length > 0 ? (

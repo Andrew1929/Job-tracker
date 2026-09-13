@@ -11,8 +11,8 @@ export function AnalyticsMetricCard({ metric }: AnalyticsMetricCardProps) {
   const isPositive = metric.trendDirection === "up";
 
   return (
-    <Card className="rounded-xl shadow-sm">
-      <CardContent className="space-y-2 p-6">
+    <Card>
+      <CardContent className="space-y-2 p-5">
         <p className="text-sm font-medium text-muted-foreground">
           {metric.title}
         </p>

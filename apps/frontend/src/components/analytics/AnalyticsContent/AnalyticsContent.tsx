@@ -18,20 +18,20 @@ import { cn } from "@/lib/utils";
 
 function AnalyticsSkeleton() {
   return (
-    <div className="space-y-6" aria-busy="true" aria-label="Loading analytics">
+    <div className="space-y-5" aria-busy="true" aria-label="Loading analytics">
       <Skeleton className="h-8 w-40" />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <Skeleton key={index} className="h-32 rounded-xl" />
+          <Skeleton key={index} className="h-24 rounded-xl" />
         ))}
       </div>
       <div className="grid min-w-0 gap-6 xl:grid-cols-3">
-        <Skeleton className="h-80 rounded-xl xl:col-span-2" />
-        <Skeleton className="h-80 rounded-xl" />
+        <Skeleton className="h-64 rounded-xl xl:col-span-2" />
+        <Skeleton className="h-64 rounded-xl" />
       </div>
       <div className="grid min-w-0 gap-6 xl:grid-cols-3">
-        <Skeleton className="h-72 rounded-xl xl:col-span-2" />
-        <Skeleton className="h-72 rounded-xl" />
+        <Skeleton className="h-56 rounded-xl xl:col-span-2" />
+        <Skeleton className="h-56 rounded-xl" />
       </div>
     </div>
   );
@@ -46,7 +46,7 @@ export function AnalyticsContent() {
 
   if (analyticsQuery.isError) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-5">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
           Analytics
         </h1>
@@ -71,7 +71,7 @@ export function AnalyticsContent() {
   return (
     <div
       className={cn(
-        "min-w-0 space-y-6 transition-opacity",
+        "min-w-0 space-y-5 transition-opacity",
         analyticsQuery.isFetching && "opacity-70",
       )}
       aria-busy={analyticsQuery.isFetching}

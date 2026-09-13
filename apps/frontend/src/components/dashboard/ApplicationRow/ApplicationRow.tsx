@@ -10,7 +10,7 @@ type ApplicationRowProps = {
 export function ApplicationRow({ application }: ApplicationRowProps) {
   return (
     <tr className="border-b border-border/60 last:border-0">
-      <td className="py-4 pr-4">
+      <td className="py-3 pr-4">
         <div className="flex items-center gap-3">
           <CompanyAvatar
             initial={application.companyInitial}
@@ -22,13 +22,13 @@ export function ApplicationRow({ application }: ApplicationRowProps) {
           </span>
         </div>
       </td>
-      <td className="hidden py-4 pr-4 text-sm text-foreground sm:table-cell">
+      <td className="hidden py-3 pr-4 text-sm text-foreground sm:table-cell">
         {application.role}
       </td>
-      <td className="py-4 pr-4">
+      <td className="py-3 pr-4">
         <JobStatusBadge status={application.status} />
       </td>
-      <td className="hidden py-4 text-sm text-muted-foreground md:table-cell">
+      <td className="hidden py-3 text-sm text-muted-foreground md:table-cell">
         {application.date}
       </td>
     </tr>

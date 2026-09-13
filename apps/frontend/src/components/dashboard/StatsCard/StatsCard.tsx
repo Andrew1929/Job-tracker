@@ -21,10 +21,10 @@ export function StatsCard({
   const isPositive = data.trendDirection === "up";
 
   return (
-    <Card className="rounded-xl shadow-sm">
-      <CardContent className="p-6">
+    <Card>
+      <CardContent className="p-5">
         <div className="flex items-start justify-between gap-4">
-          <div className="space-y-3">
+          <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground">
               {data.title}
             </p>
@@ -42,7 +42,7 @@ export function StatsCard({
           </div>
           <div
             className={cn(
-              "flex size-11 items-center justify-center rounded-full",
+              "flex size-10 items-center justify-center rounded-full",
               iconBgClass,
             )}
           >

@@ -9,13 +9,11 @@ type ConversionFunnelProps = {
 
 export function ConversionFunnel({ stages, className }: ConversionFunnelProps) {
   return (
-    <Card className={cn("min-w-0 rounded-xl shadow-sm", className)}>
-      <CardHeader className="pb-4">
-        <CardTitle className="text-base font-semibold">
-          Conversion Funnel
-        </CardTitle>
+    <Card className={cn("min-w-0", className)}>
+      <CardHeader className="pb-3">
+        <CardTitle>Conversion Funnel</CardTitle>
       </CardHeader>
-      <CardContent className="min-w-0 space-y-4 pt-0">
+      <CardContent className="min-w-0 space-y-3 pt-0">
         {stages.map((stage) => (
           <div key={stage.stage} className="space-y-2">
             <div className="flex items-center justify-between gap-3 text-sm">
