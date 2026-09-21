@@ -2,14 +2,16 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
 
   app.use(cookieParser());
 
   app.enableCors({
-    origin: process.env.CORS_ORIGIN ?? 'http://localhost:3000',
+    origin: configService.get<string>('CORS_ORIGIN', 'http://localhost:3000'),
     credentials: true,
   });
 
@@ -31,7 +33,7 @@ async function bootstrap() {
   // the in-flight reminder job stalled until the lock expires.
   app.enableShutdownHooks();
 
-  await app.listen(process.env.PORT ?? 3001);
+  await app.listen(configService.get<number>('PORT', 3001));
 }
 
 bootstrap();

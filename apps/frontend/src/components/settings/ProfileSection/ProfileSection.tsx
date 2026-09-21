@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { DEFAULT_PROFILE } from "@/constants/settings.constants";
 
 import type { ProfileFormData } from "@/types/settings.types";
+import { useAuth } from "@/hooks/useAuth";
 
 type ProfileSectionProps = {
   standalone?: boolean;
@@ -16,6 +17,13 @@ type ProfileSectionProps = {
 
 export function ProfileSection({ standalone = false }: ProfileSectionProps) {
   const [form, setForm] = useState<ProfileFormData>(DEFAULT_PROFILE);
+  const { user } = useAuth();
+
+  if(!user) {
+    return null;
+  }
+
+  const displayName = user.name ?? user.email;
 
   const updateField = (field: keyof ProfileFormData, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -39,8 +47,8 @@ export function ProfileSection({ standalone = false }: ProfileSectionProps) {
       <div className="grid gap-8 lg:grid-cols-[auto_1fr]">
         <div className="flex flex-col items-center gap-4 lg:items-start">
           <Avatar
-            alt={form.fullName}
-            fallback={form.fullName
+            alt={displayName}
+            fallback={displayName
               .split(" ")
               .map((part) => part[0])
               .join("")}
@@ -56,7 +64,7 @@ export function ProfileSection({ standalone = false }: ProfileSectionProps) {
             <Label htmlFor="fullName">Full Name</Label>
             <Input
               id="fullName"
-              value={form.fullName}
+              value={displayName}
               onChange={(event) => updateField("fullName", event.target.value)}
             />
           </div>
@@ -65,7 +73,7 @@ export function ProfileSection({ standalone = false }: ProfileSectionProps) {
             <Input
               id="email"
               type="email"
-              value={form.email}
+              value={user.email}
               onChange={(event) => updateField("email", event.target.value)}
             />
           </div>

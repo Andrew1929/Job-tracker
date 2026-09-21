@@ -24,7 +24,7 @@ export function RecentApplications({
       </CardHeader>
       <CardContent className="overflow-x-auto pt-0">
         {applications.length > 0 ? (
-          <table className="w-full min-w-[480px]">
+          <table className="w-full min-w-120">
             <thead>
               <tr className="border-b border-border/60 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 <th scope="col" className="pb-3 pr-4 font-medium">

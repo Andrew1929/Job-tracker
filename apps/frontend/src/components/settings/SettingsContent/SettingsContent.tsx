@@ -4,7 +4,6 @@ import { useState } from "react";
 
 import { NotificationsSection } from "@/components/settings/NotificationsSection";
 import { PreferencesSection } from "@/components/settings/PreferencesSection";
-import { ProfileSection } from "@/components/settings/ProfileSection";
 import { SettingsPlaceholder } from "@/components/settings/SettingsPlaceholder";
 import { SettingsTabs } from "@/components/settings/SettingsTabs";
 import { SETTINGS_TABS } from "@/constants/settings.constants";
@@ -12,7 +11,7 @@ import { SETTINGS_TABS } from "@/constants/settings.constants";
 import type { SettingsTabId } from "@/types/settings.types";
 
 export function SettingsContent() {
-  const [activeTab, setActiveTab] = useState<SettingsTabId>("profile");
+  const [activeTab, setActiveTab] = useState<SettingsTabId>("preferences");
 
   return (
     <div className="space-y-8">
@@ -23,7 +22,6 @@ export function SettingsContent() {
       />
 
       <div className="pt-2">
-        {activeTab === "profile" ? <ProfileSection /> : null}
         {activeTab === "preferences" ? <PreferencesSection /> : null}
         {activeTab === "notifications" ? <NotificationsSection /> : null}
         {activeTab === "appearance" ? (

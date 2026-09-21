@@ -10,6 +10,7 @@ import {
   InterviewDetail,
   PaginatedInterviews,
 } from '../types/interview.types';
+import { getPaginationParams } from '../../../common/utils/pagination.util';
 
 @Injectable()
 export class InterviewsService {
@@ -69,7 +70,7 @@ export class InterviewsService {
       ...(query.jobId && { jobId: query.jobId }),
       ...(query.status && { status: query.status }),
     };
-    const skip = (query.page - 1) * query.limit;
+    const { skip, take } = getPaginationParams(query.page, query.limit);
 
     const [items, total] = await this.prisma.$transaction([
       this.prisma.interview.findMany({
@@ -77,7 +78,7 @@ export class InterviewsService {
         select: INTERVIEW_SELECT,
         orderBy: { scheduledAt: query.sortOrder },
         skip,
-        take: query.limit,
+        take,
       }),
       this.prisma.interview.count({ where }),
     ]);

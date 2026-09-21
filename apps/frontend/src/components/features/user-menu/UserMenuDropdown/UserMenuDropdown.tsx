@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Loader2, LogOut, Settings, User } from "lucide-react";
+import { Loader2, LogOut, Settings } from "lucide-react";
 import { useCallback, useEffect } from "react";
 
 import { UserSummary } from "@/components/features/user-menu/UserSummary";
@@ -125,16 +125,6 @@ export function UserMenuDropdown({
         role="separator"
         aria-hidden="true"
       />
-
-      <Link
-        href={USER_MENU_ROUTES.profile}
-        role="menuitem"
-        onClick={onClose}
-        className={menuItemClassName}
-      >
-        <User className="size-4 text-muted-foreground" aria-hidden="true" />
-        Profile
-      </Link>
 
       <Link
         href={USER_MENU_ROUTES.settings}

@@ -1,0 +1,1 @@
+export { InterviewResultBadge } from "./InterviewResultBadge";

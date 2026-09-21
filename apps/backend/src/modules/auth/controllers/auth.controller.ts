@@ -44,6 +44,7 @@ import { TokenService } from '../services/token.service';
 @SerializeOptions({ strategy: 'excludeAll' })
 export class AuthController {
   private readonly authConfig: AuthConfig;
+  private readonly isProduction: boolean;
 
   constructor(
     private readonly authService: AuthService,
@@ -51,6 +52,7 @@ export class AuthController {
     configService: ConfigService,
   ) {
     this.authConfig = configService.get<AuthConfig>(AUTH_CONFIG_KEY)!;
+    this.isProduction = configService.get<string>('NODE_ENV') === 'production';
   }
 
   @Public()
@@ -143,7 +145,7 @@ export class AuthController {
       refreshToken,
       accessMaxAgeMs: this.tokenService.getAccessTokenMaxAgeMs(),
       refreshMaxAgeMs: this.tokenService.getRefreshTokenMaxAgeMs(),
-      secure: process.env.NODE_ENV === 'production',
+      secure: this.isProduction,
     });
   }
 }

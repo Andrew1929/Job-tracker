@@ -6,7 +6,6 @@ import type {
 } from "@/types/settings.types";
 
 export const SETTINGS_TABS: SettingsTab[] = [
-  { id: "profile", label: "Profile" },
   { id: "preferences", label: "Preferences" },
   { id: "notifications", label: "Notifications" },
   { id: "appearance", label: "Appearance" },

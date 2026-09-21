@@ -6,6 +6,7 @@ import {
   NOTIFICATION_LIST_SELECT,
   PaginatedNotifications,
 } from '../types/notification.types';
+import { getPaginationParams } from '../../../common/utils/pagination.util';
 
 @Injectable()
 export class NotificationsService {
@@ -16,7 +17,7 @@ export class NotificationsService {
     query: QueryNotificationsDto,
   ): Promise<PaginatedNotifications> {
     const where = this.buildWhere(userId, query);
-    const skip = (query.page - 1) * query.limit;
+    const { skip, take } = getPaginationParams(query.page, query.limit);
 
     const [items, total] = await this.prisma.$transaction([
       this.prisma.notification.findMany({
@@ -24,7 +25,7 @@ export class NotificationsService {
         select: NOTIFICATION_LIST_SELECT,
         orderBy: { createdAt: 'desc' },
         skip,
-        take: query.limit,
+        take,
       }),
       this.prisma.notification.count({ where }),
     ]);

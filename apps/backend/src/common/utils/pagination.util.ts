@@ -13,6 +13,11 @@ export type PaginationMeta = {
   hasPreviousPage: boolean;
 };
 
+export type PaginationParams = {
+  skip: number;
+  take: number;
+};
+
 export function buildPaginationMeta(pagination: {
   page: number;
   limit: number;
@@ -28,5 +33,15 @@ export function buildPaginationMeta(pagination: {
     totalPages,
     hasNextPage: page < totalPages,
     hasPreviousPage: page > 1,
+  };
+}
+
+export function getPaginationParams(
+  page: number,
+  limit: number,
+): PaginationParams {
+  return {
+    skip: (page - 1) * limit,
+    take: limit,
   };
 }

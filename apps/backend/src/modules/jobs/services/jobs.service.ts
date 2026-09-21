@@ -21,6 +21,7 @@ import {
   PaginatedJobs,
 } from '../types/job.types';
 import { CompaniesService } from './companies.service';
+import { getPaginationParams } from '../../../common/utils/pagination.util';
 
 @Injectable()
 export class JobsService {
@@ -74,7 +75,7 @@ export class JobsService {
     this.assertValidNextActionRange(query);
 
     const where = this.buildWhere(userId, query);
-    const skip = (query.page - 1) * query.limit;
+    const { skip, take } = getPaginationParams(query.page, query.limit);
 
     const [items, total] = await this.prisma.$transaction([
       this.prisma.job.findMany({
@@ -82,7 +83,7 @@ export class JobsService {
         select: JOB_LIST_SELECT,
         orderBy: { [query.sortBy]: query.sortOrder },
         skip,
-        take: query.limit,
+        take,
       }),
       this.prisma.job.count({ where }),
     ]);

@@ -4,7 +4,6 @@ import { Menu } from "lucide-react";
 
 import { UserMenu } from "@/components/features/user-menu";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
-import { SearchInput } from "@/components/shared/SearchInput";
 import { cn } from "@/lib/utils";
 
 type TopBarProps = {
@@ -16,7 +15,7 @@ export function TopBar({ onMenuClick, className }: TopBarProps) {
   return (
     <header
       className={cn(
-        "flex h-16 shrink-0 items-center gap-4 border-b border-border/60 bg-card px-4 sm:px-6 lg:px-8",
+        "flex h-16 shrink-0 items-center justify-end gap-4 border-b border-border/60 bg-card px-4 sm:px-6 lg:px-8",
         className,
       )}
     >
@@ -28,10 +27,6 @@ export function TopBar({ onMenuClick, className }: TopBarProps) {
       >
         <Menu className="size-5" />
       </button>
-
-      <div className="flex flex-1 justify-center lg:justify-start">
-        <SearchInput className="max-w-sm lg:max-w-md" />
-      </div>
 
       <div className="flex items-center gap-2 sm:gap-4">
         <NotificationBell />
