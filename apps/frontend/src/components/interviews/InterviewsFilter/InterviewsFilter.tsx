@@ -6,6 +6,7 @@ import {
   INTERVIEW_TYPE_FILTER_OPTIONS,
 } from "@/constants/interviews.constants";
 import { cn } from "@/lib/utils";
+import { SortOrder } from "@/types/jobs.types";
 
 import type { SelectOption } from "@/types/select-option.types";
 
@@ -19,8 +20,8 @@ type InterviewsFilterProps = {
   jobFilter: string;
   onJobFilterChange: (value: string) => void;
   jobOptions: readonly SelectOption[];
-  sortValue: string;
-  onSortChange: (value: string) => void;
+  sortValue: SortOrder;
+  onSortChange: (value: SortOrder) => void;
   className?: string;
 };
 
@@ -86,7 +87,11 @@ export function InterviewsFilter({
         prefix="Date"
         value={sortValue}
         options={INTERVIEW_SORT_OPTIONS}
-        onChange={onSortChange}
+        onChange={(value) => {
+          if (value === "asc" || value === "desc") {
+            onSortChange(value);
+          }
+        }}
       />
     </div>
   );

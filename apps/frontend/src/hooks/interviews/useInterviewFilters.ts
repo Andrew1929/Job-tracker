@@ -1,117 +1,96 @@
-"use client";
-
-import { useMemo, useState } from "react";
-
 import { ALL_FILTER_VALUE } from "@/constants/jobs.constants";
-import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { Interview, InterviewStatus } from "@/types/interviews.types"
+import { useMemo, useState } from "react";
+import { SortOrder } from "@/types/jobs.types";
+import { SelectOption } from "@/types/select-option.types";
+import { useDebouncedValue } from "../useDebouncedValue";
 
-import type { SelectOption } from "@/types/select-option.types";
-import type { Interview, InterviewStatus } from "@/types/interviews.types";
+const DEFAULT_SORT_VALUE = "asc";
 
-const DEFAULT_SORT_VALUE = "createdAt:desc";
-
-/** Filter + sort portion of `JobsQueryParams`, ready to merge with pagination. */
-export type JobFilterParams = {
-  search?: string;
-  status?: JobStatus;
-  companyId?: string;
-  sortBy: JobSortField;
-  sortOrder: SortOrder;
+export type InterviewFilterParams = {
+  status?: InterviewStatus;
+  jobId?: string;
+  sortOrder: SortOrder
 };
 
-type UseJobFiltersOptions = {
-  /** Called on any filter change (e.g. to reset pagination to the first page). */
+type UseInterviewFiltersOptions = {
   onChange?: () => void;
-};
-
-function parseSortValue(value: string): {
-  sortBy: JobSortField;
-  sortOrder: SortOrder;
-} {
-  const [sortBy, sortOrder] = value.split(":");
-  return {
-    sortBy: sortBy as JobSortField,
-    sortOrder: sortOrder as SortOrder,
-  };
 }
 
-/** Builds the company filter options from the currently loaded jobs. */
-export function buildCompanyOptions(jobs: Job[]): SelectOption[] {
-  const uniqueCompanies = new Map<string, string>();
-  for (const job of jobs) {
-    if (job.company) {
-      uniqueCompanies.set(job.company.id, job.company.name);
-    }
-  }
-
+export function buildInterviewOptions(interviews: Interview[]): SelectOption[] {
   return [
-    { value: ALL_FILTER_VALUE, label: "All companies" },
-    ...Array.from(uniqueCompanies, ([value, label]) => ({ value, label })),
+    { value: ALL_FILTER_VALUE, label: "All jobs" },
+      ...interviews.map((interview) => ({
+        value: interview.id,
+        label: interview.job.title,
+      })),
   ];
 }
 
-/**
- * Owns the search/status/company/sort filter state shared by the jobs list and
- * the Kanban board, and derives the query params consumed by `useJobsQuery`.
- */
-export function useInterviewFilters({ onChange }: UseJobFiltersOptions = {}) {
+export function useInterviewFilters ({onChange} : UseInterviewFiltersOptions = {}) {
   const [searchInput, setSearchInput] = useState("");
   const [statusFilter, setStatusFilter] = useState(ALL_FILTER_VALUE);
-  const [companyFilter, setCompanyFilter] = useState(ALL_FILTER_VALUE);
-  const [sortValue, setSortValue] = useState(DEFAULT_SORT_VALUE);
+  const [typeFilter, setTypeFilter] = useState(ALL_FILTER_VALUE);
+  const [jobFilter, setJobFilter] = useState(ALL_FILTER_VALUE);
+  const [sortOrder, setSortOrder] = useState<SortOrder>(DEFAULT_SORT_VALUE);
 
   const debouncedSearch = useDebouncedValue(searchInput);
-
-  const handleSearchChange = (value: string) => {
-    setSearchInput(value);
-    onChange?.();
-  };
+  
+    const handleSearchChange = (value: string) => {
+      setSearchInput(value);
+      onChange?.();
+    };
 
   const handleStatusFilterChange = (value: string) => {
     setStatusFilter(value);
     onChange?.();
   };
 
-  const handleCompanyFilterChange = (value: string) => {
-    setCompanyFilter(value);
+  const handleTypeFilterChange = (value: string) => {
+    setTypeFilter(value);
     onChange?.();
   };
 
-  const handleSortChange = (value: string) => {
-    setSortValue(value);
+  const handleJobFilterChange = (value: string) => {
+    setJobFilter(value);
     onChange?.();
   };
 
-  const params = useMemo<JobFilterParams>(() => {
-    const { sortBy, sortOrder } = parseSortValue(sortValue);
+  const handleSortChange = (value: SortOrder) => {
+    setSortOrder(value);
+    onChange?.();
+  };
 
+  const params = useMemo<InterviewFilterParams>(() => {
     return {
-      search: debouncedSearch.trim() || undefined,
       status:
         statusFilter === ALL_FILTER_VALUE
           ? undefined
-          : (statusFilter as JobStatus),
-      companyId: companyFilter === ALL_FILTER_VALUE ? undefined : companyFilter,
-      sortBy,
+          : (statusFilter as InterviewStatus),
+      jobId: jobFilter === ALL_FILTER_VALUE ? undefined : jobFilter,
       sortOrder,
-    };
-  }, [debouncedSearch, statusFilter, companyFilter, sortValue]);
+    }
+  }, [statusFilter, jobFilter, sortOrder] );
 
-  const hasActiveFilters =
+
+  const hasActiveFilters = 
     debouncedSearch.trim().length > 0 ||
     statusFilter !== ALL_FILTER_VALUE ||
-    companyFilter !== ALL_FILTER_VALUE;
+    typeFilter !== ALL_FILTER_VALUE ||
+    jobFilter !== ALL_FILTER_VALUE ;
 
   return {
     searchInput,
     statusFilter,
-    companyFilter,
-    sortValue,
+    typeFilter,
+    jobFilter,
+    sortOrder,
     handleSearchChange,
     handleStatusFilterChange,
-    handleCompanyFilterChange,
+    handleTypeFilterChange,
+    handleJobFilterChange,
     handleSortChange,
     params,
     hasActiveFilters,
-  };
-}
+  }
+};

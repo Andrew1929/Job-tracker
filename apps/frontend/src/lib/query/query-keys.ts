@@ -1,3 +1,4 @@
+import { InterviewsQueryParams } from "@/types/interviews.types";
 import type { JobsQueryParams } from "@/types/jobs.types";
 import type { NotificationsQueryParams } from "@/types/notifications.types";
 
@@ -7,6 +8,14 @@ export const jobKeys = {
   list: (params: JobsQueryParams) => [...jobKeys.lists(), params] as const,
   details: () => [...jobKeys.all, "detail"] as const,
   detail: (id: string) => [...jobKeys.details(), id] as const,
+};
+
+export const interviewKeys = {
+  all: ["interviews"] as const,
+  lists: () => [...interviewKeys.all, "list"] as const,
+  list: (params: InterviewsQueryParams) => [...interviewKeys.lists(), params] as const,
+  details: () => [...interviewKeys.all, "detail"] as const,
+  detail: (id: string) => [...interviewKeys.details(), id] as const, 
 };
 
 export const analyticsKeys = {
