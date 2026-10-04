@@ -11,11 +11,16 @@ import { InterviewsList } from "@/components/interviews/InterviewsList";
 import { InterviewsSummary } from "@/components/interviews/InterviewsSummary";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Card, CardContent } from "@/components/ui/card";
-import { DEFAULT_JOBS_PAGE_SIZE } from "@/constants/jobs.constants";
+import { ALL_FILTER_VALUE, DEFAULT_JOBS_PAGE_SIZE } from "@/constants/jobs.constants";
 import type { Interview, InterviewsQueryParams } from "@/types/interviews.types";
-import { buildInterviewOptions, useDeleteInterview, useInterviewFilters, useInterviewsQuery } from "@/hooks/interviews";
+import { useDeleteInterview, useInterviewFilters, useInterviewsQuery, useUpdateInterview } from "@/hooks/interviews";
 import { getApiErrorMessage } from "@/lib/api/error-message";
 import { calculateInterviewSummary } from "@/lib/interviews/summary-interview";
+import { INTERVIEW_JOB_OPTIONS_LIMIT, INTERVIEW_TYPE_OPTIONS, INTERVIEWS_FETCH_LIMIT } from "@/constants/interviews.constants";
+import { buildJobOptions, useJobsQuery } from "@/hooks/jobs";
+import { JobsQueryParams } from "@/types/jobs.types";
+import type { SelectOption } from "@/types/select-option.types";
+import { dateTimeLocalKeyToIso } from "@/lib/date/date-time";
 
 type InterviewFormState =
   | { mode: "create" }
@@ -34,29 +39,65 @@ export function InterviewsContent() {
 
   const filters = useInterviewFilters({onChange: () => setPage(1)});
 
-  const queryParams = useMemo<InterviewsQueryParams>(
+  const interviewQueryParams = useMemo<InterviewsQueryParams>(
     () => ({ page, limit: DEFAULT_JOBS_PAGE_SIZE, ...filters.params }),
     [page, filters.params],
   );
+
+  const jobQueryParams = useMemo<JobsQueryParams> (
+    () => ({
+      page: 1,
+      limit: INTERVIEW_JOB_OPTIONS_LIMIT,
+      sortBy:"createdAt",
+      sortOrder: "desc",
+    }),
+    []
+  )
  
-  const interviewsQuery = useInterviewsQuery(queryParams);
+  const interviewsQuery = useInterviewsQuery(interviewQueryParams);
+  const jobsQuery = useJobsQuery(jobQueryParams);
+
   const deleteInterview = useDeleteInterview();
+  const completeInterview = useUpdateInterview();
+  const rescheduleInterview = useUpdateInterview();
+  const cancelInterview = useUpdateInterview();
 
   const interviews = useMemo (
     () => interviewsQuery.data?.items ?? [],
     [interviewsQuery.data]
   );
 
+  const jobs = useMemo(
+    () => jobsQuery.data?.items ?? [], 
+    [jobsQuery.data]
+  );
+
+  const summaryQuery = useInterviewsQuery({
+    page: 1,
+    limit: INTERVIEWS_FETCH_LIMIT,
+    sortOrder: "asc",
+  });
+
+  const summaryInterviews = useMemo (
+    () => summaryQuery.data?.items ?? [],
+    [summaryQuery.data]
+  );
+
   const summaryCounts = useMemo (
-    () => calculateInterviewSummary(interviews),
-    [interviews]
+    () => calculateInterviewSummary(summaryInterviews),
+    [summaryInterviews]
   );
 
   const meta = interviewsQuery.data?.meta;
 
-  const interviewsOption = useMemo (
-    () => buildInterviewOptions(interviews),
-    [interviews]
+  const jobOption = useMemo (
+    () => buildJobOptions(jobs),
+    [jobs]
+  );
+
+  const jobFilterOptions = useMemo<SelectOption[]>(
+    () => [{ value: ALL_FILTER_VALUE, label: "All jobs" }, ...jobOption],
+    [jobOption]
   );
 
   const handleConfirmDelete = async () => {
@@ -72,15 +113,75 @@ export function InterviewsContent() {
       if(interviews.length === 1 && page > 1) {
         setPage((current) => current - 1);
       }
+
+      setDeleteTarget(null);
     } catch (error) {
       setDeleteError(getApiErrorMessage(error))
     }
   };
 
-  const handleCompleteInterview = () => {};
-  const handleRescheduleInterview = () => {};
-  const describeInterview = () => {};
-  const handleCancelInterview = () => {};
+  const handleCompleteInterview = async () => {
+    if(!completeTarget) {
+      return
+    }
+
+    try {
+      await completeInterview.mutateAsync({
+        id: completeTarget.id,
+        input: {status: "COMPLETED"},
+      })
+
+      setCompleteTarget(null)
+    } catch {
+      // surfaced via completeInterview.error in the dialog
+    }
+  };
+
+  const handleRescheduleInterview = async (scheduledAtLocalKey: string) => {
+    if(!rescheduleTarget) {
+      return
+    }
+
+    try {
+      await rescheduleInterview.mutateAsync({
+        id: rescheduleTarget.id,
+        input : {scheduledAt: dateTimeLocalKeyToIso(scheduledAtLocalKey)}
+      })
+
+      setRescheduleTarget(null);
+    } catch {
+      // surfaced via rescheduleInterview.error in the dialog
+    }
+  };
+
+  const describeInterview = (target: Interview) => {
+    const companyName = target.job.company?.name;
+
+    const typeLabel =
+      INTERVIEW_TYPE_OPTIONS.find((option) => option.value === target.type)?.label
+      ?? target.type;
+
+    return companyName
+      ? `${target.job.title} at ${companyName} (${typeLabel})`
+      : `${target.job.title} (${typeLabel})`;
+  };
+
+  const handleCancelInterview = async () => {
+    if(!cancelTarget) {
+      return
+    }
+
+    try {
+      await cancelInterview.mutateAsync({
+        id: cancelTarget.id,
+        input: {status: "CANCELLED"}
+      })
+
+      setCancelTarget(null)
+    } catch {
+      // surfaced via cancelInterview.error in the dialog
+    }
+  };
 
   return (
     <div className="flex min-h-full flex-col gap-6">
@@ -99,7 +200,7 @@ export function InterviewsContent() {
             onTypeFilterChange={filters.handleTypeFilterChange}
             jobFilter={filters.jobFilter}
             onJobFilterChange={filters.handleJobFilterChange}
-            jobOptions={interviewsOption}
+            jobOptions={jobFilterOptions}
             sortValue={filters.sortOrder}
             onSortChange={filters.handleSortChange}
           />
@@ -144,7 +245,7 @@ export function InterviewsContent() {
         <InterviewFormDrawer
           mode={formState.mode}
           interview={formState.mode === "edit" ? formState.interview : undefined}
-          jobOptions={interviewsOption}
+          jobOptions={jobOption}
           onClose={() => setFormState(null)}
         />
       ) : null}
@@ -152,8 +253,8 @@ export function InterviewsContent() {
       {rescheduleTarget ? (
         <InterviewRescheduleDialog
           interview={rescheduleTarget}
-          isLoading={interviewsQuery.isLoading}
-          errorMessage={getApiErrorMessage(interviewsQuery.error)}
+          isLoading={rescheduleInterview.isPending}
+          errorMessage={getApiErrorMessage(rescheduleInterview.error)}
           onClose={() => setRescheduleTarget(null)}
           onConfirm={handleRescheduleInterview}
         />
@@ -173,8 +274,8 @@ export function InterviewsContent() {
             : ""
         }
         confirmLabel="Mark as completed"
-        isLoading={interviewsQuery.isLoading}
-        errorMessage={getApiErrorMessage(interviewsQuery.error)}
+        isLoading={completeInterview.isPending}
+        errorMessage={getApiErrorMessage(completeInterview.error)}
         onConfirm={handleCompleteInterview}
       />
 
@@ -194,8 +295,8 @@ export function InterviewsContent() {
         confirmLabel="Cancel interview"
         cancelLabel="Keep interview"
         destructive
-        isLoading={interviewsQuery.isLoading}
-        errorMessage={getApiErrorMessage(interviewsQuery.error)}
+        isLoading={cancelInterview.isPending}
+        errorMessage={getApiErrorMessage(cancelInterview.error)}
         onConfirm={handleCancelInterview}
       />
 

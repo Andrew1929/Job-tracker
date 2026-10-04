@@ -1,8 +1,7 @@
 import { ALL_FILTER_VALUE } from "@/constants/jobs.constants";
-import { Interview, InterviewStatus } from "@/types/interviews.types"
+import { InterviewStatus } from "@/types/interviews.types"
 import { useMemo, useState } from "react";
 import { SortOrder } from "@/types/jobs.types";
-import { SelectOption } from "@/types/select-option.types";
 import { useDebouncedValue } from "../useDebouncedValue";
 
 const DEFAULT_SORT_VALUE = "asc";
@@ -15,16 +14,6 @@ export type InterviewFilterParams = {
 
 type UseInterviewFiltersOptions = {
   onChange?: () => void;
-}
-
-export function buildInterviewOptions(interviews: Interview[]): SelectOption[] {
-  return [
-    { value: ALL_FILTER_VALUE, label: "All jobs" },
-      ...interviews.map((interview) => ({
-        value: interview.id,
-        label: interview.job.title,
-      })),
-  ];
 }
 
 export function useInterviewFilters ({onChange} : UseInterviewFiltersOptions = {}) {

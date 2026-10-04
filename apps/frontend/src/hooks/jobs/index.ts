@@ -6,5 +6,5 @@ export {
   useUpdateJobStatus,
   useDeleteJob,
 } from "./useJobMutations";
-export { useJobFilters, buildCompanyOptions } from "./useJobFilters";
+export { useJobFilters, buildCompanyOptions, buildJobOptions } from "./useJobFilters";
 export type { JobFilterParams } from "./useJobFilters";

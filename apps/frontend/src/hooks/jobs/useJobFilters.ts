@@ -55,6 +55,13 @@ export function buildCompanyOptions(jobs: Job[]): SelectOption[] {
   ];
 }
 
+export function buildJobOptions(jobs: Job[]): SelectOption[] {
+  return jobs.map((job) => ({
+    value: job.id,
+    label: job.company ? `${job.title} · ${job.company.name}` : job.title,
+  }));
+}
+
 /**
  * Owns the search/status/company/sort filter state shared by the jobs list and
  * the Kanban board, and derives the query params consumed by `useJobsQuery`.

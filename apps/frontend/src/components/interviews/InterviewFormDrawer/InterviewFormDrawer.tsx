@@ -2,11 +2,14 @@
 
 import { InterviewForm } from "@/components/interviews/InterviewForm";
 import { Drawer } from "@/components/shared/Drawer";
+import { useCreateInterview, useUpdateInterview } from "@/hooks/interviews";
+import { getApiErrorMessage } from "@/lib/api/error-message";
 import { toDateTimeLocalKey } from "@/lib/date/date-time";
 import type { InterviewFormValues } from "@/lib/validations/interview.schema";
 
-import type { Interview, InterviewFormMode } from "@/types/interviews.types";
+import type { CreateInterviewInput, Interview, InterviewFormMode, UpdateInterviewInput } from "@/types/interviews.types";
 import type { SelectOption } from "@/types/select-option.types";
+import { useState } from "react";
 
 type InterviewFormDrawerProps = {
   mode: InterviewFormMode;
@@ -15,10 +18,6 @@ type InterviewFormDrawerProps = {
   onClose: () => void;
 };
 
-/**
- * Prefills the edit form from an interview already on screen. This only turns
- * loaded values into form strings; it never builds a request.
- */
 function interviewToFormValues(interview: Interview): InterviewFormValues {
   return {
     jobId: interview.jobId,
@@ -45,6 +44,83 @@ function formatJobLabel(interview: Interview): string {
   return company ? `${interview.job.title} · ${company}` : interview.job.title;
 }
 
+function formValuesToCreateInput(
+  values: InterviewFormValues,
+): CreateInterviewInput {
+  return {
+    jobId: values.jobId,
+    type: values.type,
+    scheduledAt: values.scheduledAt,
+
+    durationMinutes:
+      values.durationMinutes !== ""
+        ? Number(values.durationMinutes)
+        : undefined,
+
+    remoteType: values.remoteType || undefined,
+    location: values.location || undefined,
+
+    interviewers: values.interviewers
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean),
+
+    prepNotes: values.prepNotes || undefined,
+    status: values.status,
+    result: values.result,
+
+    rating:
+      values.rating !== ""
+        ? Number(values.rating)
+        : undefined,
+
+    difficulty:
+      values.difficulty !== ""
+        ? Number(values.difficulty)
+        : undefined,
+
+    feedback: values.feedback || undefined,
+  };
+}
+
+function formValuesToUpdateInput(
+  values: InterviewFormValues,
+): UpdateInterviewInput {
+  return {
+    type: values.type,
+    scheduledAt: values.scheduledAt,
+
+    durationMinutes:
+      values.durationMinutes !== ""
+        ? Number(values.durationMinutes)
+        : undefined,
+
+    remoteType: values.remoteType || undefined,
+    location: values.location || undefined,
+
+    interviewers: values.interviewers
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean),
+
+    prepNotes: values.prepNotes || undefined,
+    status: values.status,
+    result: values.result,
+
+    rating:
+      values.rating !== ""
+        ? Number(values.rating)
+        : undefined,
+
+    difficulty:
+      values.difficulty !== ""
+        ? Number(values.difficulty)
+        : undefined,
+
+    feedback: values.feedback || undefined,
+  };
+}
+
 /** Create/edit shell with the same structure as `JobFormDrawer`. */
 export function InterviewFormDrawer({
   mode,
@@ -54,24 +130,52 @@ export function InterviewFormDrawer({
 }: InterviewFormDrawerProps) {
   const isEdit = mode === "edit" && interview !== undefined;
 
-  // TODO(data): replace with the pending state of your create/update mutations.
-  const isSubmitting = false;
+  const createInterview = useCreateInterview();
+  const updateInterview = useUpdateInterview();
 
-  // TODO(data): hold the API error message here (see `getApiErrorMessage`)
-  // and set it when a create/update call fails.
-  const errorMessage: string | null = null;
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleCreateInterview = (values: InterviewFormValues) => {
-    // TODO: connect the create mutation.
-    // Map `values` to a CreateInterviewInput, submit it, then close on success.
-    console.info("[interviews] create not connected yet", values);
+  const isSubmitting = isEdit
+    ? updateInterview.isPending
+    : createInterview.isPending;
+
+ const handleCreateInterview = async (
+    values: InterviewFormValues,
+  ) => {
+    setErrorMessage(null);
+
+    try {
+      const input = formValuesToCreateInput(values);
+
+      await createInterview.mutateAsync(input);
+
+      onClose();
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error));
+    }
   };
 
-  const handleUpdateInterview = (values: InterviewFormValues) => {
-    // TODO: connect the update mutation.
-    // Map `values` to an UpdateInterviewInput (no jobId) for `interview.id`,
-    // submit it, then close on success.
-    console.info("[interviews] update not connected yet", values);
+  const handleUpdateInterview = async (
+    values: InterviewFormValues,
+  ) => {
+    if (!interview) {
+      return;
+    }
+
+    setErrorMessage(null);
+
+    try {
+      const input = formValuesToUpdateInput(values);
+
+      await updateInterview.mutateAsync({
+        id: interview.id,
+        input,
+      });
+
+      onClose();
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error));
+    }
   };
 
   return (
