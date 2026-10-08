@@ -1,0 +1,109 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+
+    environment:
+      POSTGRES_DB: job_tracker
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d job_tracker"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+
+  redis:
+    image: redis:7-alpine
+
+    volumes:
+      - redis_data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+
+  migrate:
+    image: job-tracker-backend:local
+
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/job_tracker?schema=public
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    command: ["pnpm", "exec", "prisma", "migrate", "deploy"]
+
+    restart: "no"
+
+
+  backend:
+    image: job-tracker-backend:local
+
+    build:
+      context: ../../apps/backend
+      dockerfile: ../../infra/docker/backend.Dockerfile
+
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+
+      CORS_ORIGIN: http://localhost:3000
+
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/job_tracker?schema=public
+
+      REDIS_URL: redis://redis:6379
+
+      NOTIFICATION_QUEUE_ENABLED: "true"
+
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 30d
+
+      BCRYPT_ROUNDS: 12
+      AUTH_USE_COOKIES: "false"
+
+    ports:
+      - "3001:3001"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      redis:
+        condition: service_healthy
+
+      migrate:
+        condition: service_completed_successfully
+
+
+  frontend:
+    image: job-tracker-frontend:local
+
+    build:
+      context: ../../apps/frontend
+      dockerfile: ../../infra/docker/frontend.Dockerfile
+
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:3001
+
+    ports:
+      - "3000:3000"
+
+    depends_on:
+      - backend
+
+
+volumes:
+  postgres_data:
+  redis_data:
