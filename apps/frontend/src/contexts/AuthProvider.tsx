@@ -88,6 +88,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   useEffect(() => {
+    // Restore the authentication session from token storage.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void initializeSession();
   }, [initializeSession]);
 
