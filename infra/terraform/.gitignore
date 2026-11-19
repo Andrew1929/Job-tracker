@@ -1,0 +1,22 @@
+# Terraform cache
+.terraform/
+
+# State files — never commit
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Terraform plans
+tfplan
+*.tfplan
+plan.txt
+
+# Secrets and local variables
+*.tfvars
+*.tfvars.json
+.env
+.env.*
+
+# Crash logs
+crash.log
+crash.*.log
