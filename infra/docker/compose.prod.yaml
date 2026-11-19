@@ -1,0 +1,33 @@
+services:
+  frontend:
+    ports: !override
+      - "127.0.0.1:3000:3000"
+    build:
+      args:
+        NEXT_PUBLIC_API_URL: ""
+
+  backend:
+    ports: !override
+      - "127.0.0.1:3001:3001"
+    environment:
+      CORS_ORIGIN: https://${DOMAIN}
+
+  proxy:
+    image: caddy:2-alpine
+    environment:
+      DOMAIN: ${DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:
