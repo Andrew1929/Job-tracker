@@ -1,0 +1,14 @@
+
+services:
+  backend:
+    image: ghcr.io/andrew1929/job-tracker-backend:${IMAGE_TAG:?IMAGE_TAG is required}
+    build: !reset null
+    restart: unless-stopped
+
+  frontend:
+    image: ghcr.io/andrew1929/job-tracker-frontend:${IMAGE_TAG:?IMAGE_TAG is required}
+    build: !reset null
+    restart: unless-stopped
+
+  migrate:
+    image: ghcr.io/andrew1929/job-tracker-backend:${IMAGE_TAG:?IMAGE_TAG is required}
