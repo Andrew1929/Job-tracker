@@ -9,6 +9,8 @@ resource "aws_instance" "web" {
 
   key_name = aws_key_pair.learning.key_name
 
+  iam_instance_profile = aws_iam_instance_profile.ec2.name
+
   user_data = file("${path.module}/userdata.sh")
 
   root_block_device {
@@ -23,6 +25,13 @@ resource "aws_instance" "web" {
 
   credit_specification {
     cpu_credits = "standard"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      associate_public_ip_address,
+      user_data
+    ]
   }
 
   tags = {
